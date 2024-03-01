@@ -92,8 +92,6 @@ class AuthController extends BaseController
     {
 
         try {
-
-
             // validation
             $validation = Validator::make($request->all(), [
                 'username' => 'required',
@@ -131,7 +129,6 @@ class AuthController extends BaseController
     public function logout()
     {
         try {
-
             auth()->user()->tokens()->delete();
             return $this->sendSuccess([], "Logout Successful");
         } catch (\Throwable $th) {
@@ -150,10 +147,7 @@ class AuthController extends BaseController
 
     public function changePassword(Request $request)
     {
-
         try {
-
-
             // validation
             $validation = Validator::make($request->all(), [
                 'password' => 'required|confirmed',
