@@ -47,4 +47,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function course()
+    {
+        return $this->hasMany(SubscribeCourse::class , 'user_id', 'id')->with('subscribe');
+    }
 }

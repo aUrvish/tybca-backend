@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\RegistrationMail;
 use App\Mail\ResetPasswordMail;
 use App\Models\PasswordResetToken;
+use App\Models\SubscribeCourse;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -17,14 +18,12 @@ class AuthController extends BaseController
 {
     public function add(Request $request)
     {
-
         try {
 
             // validation
             $validation = Validator::make($request->all(), [
                 'name' => 'required',
                 'email' => 'required|email',
-                'avatar' => 'required|image',
                 'mobile' => 'required|numeric',
                 'gender' => 'required',
                 'city' => 'required',
@@ -59,6 +58,7 @@ class AuthController extends BaseController
 
                 if ($request->role == "teacher") {
                     $user->role_id = 1;
+
                 }
 
                 $user->name = $request->name;
@@ -68,6 +68,21 @@ class AuthController extends BaseController
                 $user->city = $request->city;
                 $user->country = $request->country;
                 $user->save();
+
+                if ($request->courses) {
+                    $courseArr = explode(",",$request->courses);
+                    
+                    foreach ($courseArr as $course_id) {
+                        $coursePresent = SubscribeCourse::where('user_id', $user->id)->where('course_id', $course_id)->first();
+                        
+                        if (!$coursePresent) {
+                            $subCourse = new SubscribeCourse();
+                            $subCourse->user_id = $user->id;
+                            $subCourse->course_id = $course_id;
+                            $subCourse->save();
+                        }
+                    }
+                }
 
                 $data['name'] = $request->name;
                 $data['email'] = $request->email;
@@ -111,7 +126,7 @@ class AuthController extends BaseController
                 if ($user->role_id == 0) {
                     $token = $user->createToken('admin-auth')->plainTextToken;
                 } elseif ($user->role_id == 1) {
-                    $token = $user->createToken('teacher-auth', [])->plainTextToken;
+                    $token = $user->createToken('teacher-auth', ['course-crud', 'auth-edit-profile'])->plainTextToken;
                 } else {
                     $token = $user->createToken('student-auth', [])->plainTextToken;
                 }
@@ -131,15 +146,6 @@ class AuthController extends BaseController
         try {
             auth()->user()->tokens()->delete();
             return $this->sendSuccess([], "Logout Successful");
-        } catch (\Throwable $th) {
-            return $this->sendError("Internal Server Error", 500);
-        }
-    }
-
-    public function profile()
-    {
-        try {
-            return $this->sendSuccess(auth()->user(), "User Data");
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
         }
