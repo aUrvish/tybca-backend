@@ -31,6 +31,8 @@ Route::controller(AuthController::class)->prefix('auth')->group(
             Route::post('add', 'add');
             Route::get('logout', 'logout');
             Route::post('change-password', 'changePassword');
+            Route::get('students/get', 'studentShow');
+            Route::get('teachers/get', 'teacherShow');
         });
     }
 );
