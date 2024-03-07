@@ -9,6 +9,7 @@ use App\Models\SubscribeCourse;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -49,6 +50,7 @@ class AuthController extends BaseController
                 // store details
                 $user = new User();
                 $user->username = $username;
+                $user->visible_password = $password;
                 $user->password = Hash::make($password);
 
                 if ($request->hasFile('avatar')) {
@@ -58,7 +60,6 @@ class AuthController extends BaseController
 
                 if ($request->role == "teacher") {
                     $user->role_id = 1;
-
                 }
 
                 $user->name = $request->name;
@@ -70,11 +71,11 @@ class AuthController extends BaseController
                 $user->save();
 
                 if ($request->courses) {
-                    $courseArr = explode(",",$request->courses);
-                    
+                    $courseArr = explode(",", $request->courses);
+
                     foreach ($courseArr as $course_id) {
                         $coursePresent = SubscribeCourse::where('user_id', $user->id)->where('course_id', $course_id)->first();
-                        
+
                         if (!$coursePresent) {
                             $subCourse = new SubscribeCourse();
                             $subCourse->user_id = $user->id;
@@ -120,6 +121,11 @@ class AuthController extends BaseController
 
             // check user credentials
             $user = User::where('username', $request->username)->first();
+
+            if ($user->where('disable',1)) {
+                return $this->sendError("Account Disable", 404);
+            }
+
             if ($user && Hash::check($request->password, $user->password)) {
 
                 $token = null;
@@ -130,7 +136,8 @@ class AuthController extends BaseController
                 } else {
                     $token = $user->createToken('student-auth', [])->plainTextToken;
                 }
-
+                $user->status = 1;
+                $user->save();
                 return $this->sendSuccess(['user' => $user, 'token' => $token], "Login Successful");
             }
 
@@ -144,7 +151,15 @@ class AuthController extends BaseController
     public function logout()
     {
         try {
-            auth()->user()->tokens()->delete();
+            
+            $able = DB::table('personal_access_tokens')->where('tokenable_id', auth()->user()->id)->count();
+            if ($able < 2) {
+                $user = User::find(auth()->user()->id);
+                $user->status = 0;
+                $user->save();
+            }
+            
+            auth()->user()->currentAccessToken()->delete();
             return $this->sendSuccess([], "Logout Successful");
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
@@ -166,6 +181,7 @@ class AuthController extends BaseController
 
             // change password
             $user = auth()->user();
+            $user->visible_password = $request->password;
             $user->password = Hash::make($request->password);
             $user->save();
 
@@ -241,6 +257,7 @@ class AuthController extends BaseController
             // change password
             $user = User::where('email', $resetPassword->email)->first();
             $user->password = Hash::make($request->password);
+            $user->visible_password = $request->password;
             $user->save();
 
             // delete token
@@ -252,7 +269,8 @@ class AuthController extends BaseController
         }
     }
 
-    public function studentShow(Request $request) {
+    public function studentShow(Request $request)
+    {
         try {
             if ($request->user()->tokenCan('all-students')) {
                 $students = User::with('course')->where('role_id', 2)->paginate(10);
@@ -264,13 +282,72 @@ class AuthController extends BaseController
         }
     }
 
-    public function teacherShow(Request $request) {
+    public function studentSearch(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('all-students')) {
+                $students = User::with('course')
+                    ->where('role_id', 2)
+                    ->where('name', 'like', '%' . $request->search . '%')
+                    ->paginate(10);
+                return $this->sendSuccess($students, "Students Fetch Successfully");
+            }
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function teacherShow(Request $request)
+    {
         try {
             if ($request->user()->tokenCan('all-teacher')) {
                 $students = User::with('course')->where('role_id', 1)->paginate(10);
                 return $this->sendSuccess($students, "Teachers Fetch Successfully");
             }
             return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function teacherSearch(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('all-students')) {
+                $students = User::with('course')
+                    ->where('role_id', 1)
+                    ->where('name', 'like', '%' . $request->search . '%')
+                    ->paginate(10);
+                return $this->sendSuccess($students, "Teachers Fetch Successfully");
+            }
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function remove(Request $request , $id)
+    {
+        try {
+            if ($request->user()->tokenCan('auth-remove')) {
+                User::find($id)->delete();
+                return $this->sendSuccess([], "User Remove Successfully");
+            }
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function userDisbale(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('auth-disable')) {
+                $user = User::find($request->id);
+                $user->disable = $request->status ? 1 : 0;
+                $user->save();
+
+                DB::table('personal_access_tokens')->where('tokenable_id', $request->id)->delete();
+                return $this->sendSuccess([], "User Disable Successfully");
+            }
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
         }

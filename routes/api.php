@@ -29,10 +29,14 @@ Route::controller(AuthController::class)->prefix('auth')->group(
 
         Route::middleware(['auth:sanctum'])->group(function() {
             Route::post('add', 'add');
+            Route::get('remove/{id}', 'remove');
             Route::get('logout', 'logout');
             Route::post('change-password', 'changePassword');
             Route::get('students/get', 'studentShow');
             Route::get('teachers/get', 'teacherShow');
+            Route::post('teachers/search', 'teacherSearch');
+            Route::post('students/search', 'studentSearch');
+            Route::post('disable', 'userDisbale');
         });
     }
 );
