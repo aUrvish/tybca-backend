@@ -45,7 +45,8 @@ class AuthController extends BaseController
 
                 // genrate username and password
                 $password = fake()->unique()->password();
-                $username = fake()->unique()->userName();
+                $username = Str::lower( Str::replace(" ", '' ,$request->name) . Str::random(5));
+
 
                 // store details
                 $user = new User();
@@ -122,7 +123,7 @@ class AuthController extends BaseController
             // check user credentials
             $user = User::where('username', $request->username)->first();
 
-            if ($user->where('disable',1)) {
+            if ($user->where('disable',1)->first()) {
                 return $this->sendError("Account Disable", 404);
             }
 
@@ -134,7 +135,7 @@ class AuthController extends BaseController
                 } elseif ($user->role_id == 1) {
                     $token = $user->createToken('teacher-auth', ['course-crud', 'auth-edit-profile', 'all-students'])->plainTextToken;
                 } else {
-                    $token = $user->createToken('student-auth', [])->plainTextToken;
+                    $token = $user->createToken('student-auth', ['all-teacher'])->plainTextToken;
                 }
                 $user->status = 1;
                 $user->save();
@@ -313,7 +314,7 @@ class AuthController extends BaseController
     public function teacherSearch(Request $request)
     {
         try {
-            if ($request->user()->tokenCan('all-students')) {
+            if ($request->user()->tokenCan('all-teacher')) {
                 $students = User::with('course')
                     ->where('role_id', 1)
                     ->where('name', 'like', '%' . $request->search . '%')

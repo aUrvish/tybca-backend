@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +48,14 @@ Route::controller(ProfileController::class)->middleware(['auth:sanctum'])->group
         Route::get('profile/{id}', 'userProfile');
         Route::post('profiles-edit', 'profilesEdit');
         Route::post('auth-profiles-edit', 'authProfileEdit');
+    }
+);
+
+Route::controller(OverviewController::class)->middleware(['auth:sanctum'])->group(
+    function(){
+        Route::get('overview/get', 'get');
+        Route::get('overview/students', 'students');
+        Route::get('overview/teachers', 'teachers');
     }
 );
 
