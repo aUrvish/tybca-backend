@@ -14,7 +14,7 @@ class ProfileController extends BaseController
     {
         try {
             $id = auth()->user()->id;
-            $user = User::with('course')->where('id', $id)->first();
+            $user = User::where('is_deleted' , 0)->with('course')->where('id', $id)->first();
             return $this->sendSuccess($user, "User Data");
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
@@ -162,7 +162,7 @@ class ProfileController extends BaseController
     public function userProfile(Request $request, $id) {
         try {
             if ($request->user()->tokenCan('show-profiles')){
-                $user = User::with('course')->where('id', $id)->first();
+                $user = User::with('course')->where('is_deleted' , 0)->where('id', $id)->first();
                 return $this->sendSuccess($user, "Profile fetched Successfully"); 
             }
             return $this->sendError("Not Found", 404);

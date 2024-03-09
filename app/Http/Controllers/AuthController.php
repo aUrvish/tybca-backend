@@ -44,9 +44,8 @@ class AuthController extends BaseController
                 }
 
                 // genrate username and password
-                $password = fake()->unique()->password();
+                $password = Str::password(8,true, true, false);
                 $username = Str::lower( Str::replace(" ", '' ,$request->name) . Str::random(5));
-
 
                 // store details
                 $user = new User();
@@ -121,9 +120,9 @@ class AuthController extends BaseController
             }
 
             // check user credentials
-            $user = User::where('username', $request->username)->first();
+            $user = User::where('is_deleted' , 0)->where('username', $request->username)->first();
 
-            if ($user->where('disable',1)->first()) {
+            if ($user && $user->disable == 1) {
                 return $this->sendError("Account Disable", 404);
             }
 
@@ -133,7 +132,7 @@ class AuthController extends BaseController
                 if ($user->role_id == 0) {
                     $token = $user->createToken('admin-auth')->plainTextToken;
                 } elseif ($user->role_id == 1) {
-                    $token = $user->createToken('teacher-auth', ['course-crud', 'auth-edit-profile', 'all-students'])->plainTextToken;
+                    $token = $user->createToken('teacher-auth', ['course-crud', 'auth-edit-profile', 'all-students', 'save-notice', 'delete-notice'])->plainTextToken;
                 } else {
                     $token = $user->createToken('student-auth', ['all-teacher'])->plainTextToken;
                 }
@@ -206,7 +205,7 @@ class AuthController extends BaseController
                 return $this->sendError("Validation Error", 403);
             }
 
-            $user = User::where('email', $request->email)->first();
+            $user = User::where('is_deleted' , 0)->where('email', $request->email)->first();
             if (!$user) {
                 return $this->sendError("User Not Found", 404);
             }
@@ -256,7 +255,7 @@ class AuthController extends BaseController
             }
 
             // change password
-            $user = User::where('email', $resetPassword->email)->first();
+            $user = User::where('is_deleted' , 0)->where('email', $resetPassword->email)->first();
             $user->password = Hash::make($request->password);
             $user->visible_password = $request->password;
             $user->save();
@@ -274,7 +273,7 @@ class AuthController extends BaseController
     {
         try {
             if ($request->user()->tokenCan('all-students')) {
-                $students = User::with('course')->where('role_id', 2)->paginate(10);
+                $students = User::with('course')->where('is_deleted' , 0)->where('role_id', 2)->paginate(10);
                 return $this->sendSuccess($students, "Students Fetch Successfully");
             }
             return $this->sendError("Not Found", 404);
@@ -288,11 +287,13 @@ class AuthController extends BaseController
         try {
             if ($request->user()->tokenCan('all-students')) {
                 $students = User::with('course')
+                    ->where('is_deleted' , 0)
                     ->where('role_id', 2)
                     ->where('name', 'like', '%' . $request->search . '%')
                     ->paginate(10);
                 return $this->sendSuccess($students, "Students Fetch Successfully");
             }
+            return $this->sendError("Not Found", 404);
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
         }
@@ -302,7 +303,7 @@ class AuthController extends BaseController
     {
         try {
             if ($request->user()->tokenCan('all-teacher')) {
-                $students = User::with('course')->where('role_id', 1)->paginate(10);
+                $students = User::with('course')->where('is_deleted' , 0)->where('role_id', 1)->paginate(10);
                 return $this->sendSuccess($students, "Teachers Fetch Successfully");
             }
             return $this->sendError("Not Found", 404);
@@ -316,9 +317,39 @@ class AuthController extends BaseController
         try {
             if ($request->user()->tokenCan('all-teacher')) {
                 $students = User::with('course')
+                    ->where('is_deleted' , 0)
                     ->where('role_id', 1)
                     ->where('name', 'like', '%' . $request->search . '%')
                     ->paginate(10);
+                return $this->sendSuccess($students, "Teachers Fetch Successfully");
+            }
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function staffShow(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('all-teacher')) {
+                $students = User::with('course')->where('is_deleted' , 0)->where('role_id', 1)->get();
+                return $this->sendSuccess($students, "Teachers Fetch Successfully");
+            }
+            return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function staffSearch(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('all-teacher')) {
+                $students = User::with('course')
+                    ->where('is_deleted' , 0)
+                    ->where('role_id', 1)
+                    ->where('name', 'like', '%' . $request->search . '%')
+                    ->get();
                 return $this->sendSuccess($students, "Teachers Fetch Successfully");
             }
         } catch (\Throwable $th) {
@@ -330,7 +361,11 @@ class AuthController extends BaseController
     {
         try {
             if ($request->user()->tokenCan('auth-remove')) {
-                User::find($id)->delete();
+                $user = User::find($id);
+                $user->is_deleted = 1;
+                $user->save();
+
+                DB::table('personal_access_tokens')->where('tokenable_id', $user->id)->delete();
                 return $this->sendSuccess([], "User Remove Successfully");
             }
         } catch (\Throwable $th) {

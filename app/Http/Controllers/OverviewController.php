@@ -10,8 +10,8 @@ class OverviewController extends BaseController
     public function get(){
         
         try {
-            $students = User::where('role_id', 2)->count();
-            $teachers = User::where('role_id', 1)->count();
+            $students = User::where('is_deleted' , 0)->where('role_id', 2)->count();
+            $teachers = User::where('is_deleted' , 0)->where('role_id', 1)->count();
 
             $data = [
                 'students' => $students,
@@ -27,7 +27,7 @@ class OverviewController extends BaseController
     public function students(Request $request) {
         try {
             if ($request->user()->tokenCan('all-students')) {
-                $students = User::where('role_id', 2)->orderBy('created_at')->take(5)->get();
+                $students = User::where('is_deleted' , 0)->where('role_id', 2)->orderBy('created_at')->take(5)->get();
                 return $this->sendSuccess($students, "Fetch Data Successfully");
             }
             return $this->sendError("Not Found", 404);
@@ -39,7 +39,7 @@ class OverviewController extends BaseController
     public function teachers(Request $request) {
         try {
             if ($request->user()->tokenCan('all-teacher')) {
-                $teachers = User::where('role_id', 1)->orderBy('created_at')->take(5)->get();
+                $teachers = User::where('is_deleted' , 0)->where('role_id', 1)->orderBy('created_at')->take(5)->get();
                 return $this->sendSuccess($teachers, "Fetch Data Successfully");
             }
             return $this->sendError("Not Found", 404);

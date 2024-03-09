@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
@@ -35,8 +36,10 @@ Route::controller(AuthController::class)->prefix('auth')->group(
             Route::post('change-password', 'changePassword');
             Route::get('students/get', 'studentShow');
             Route::get('teachers/get', 'teacherShow');
+            Route::get('staff/get', 'staffShow');
             Route::post('teachers/search', 'teacherSearch');
             Route::post('students/search', 'studentSearch');
+            Route::post('staff/search', 'staffSearch');
             Route::post('disable', 'userDisbale');
         });
     }
@@ -64,5 +67,18 @@ Route::controller(CourseController::class)->middleware(['auth:sanctum'])->group(
         Route::get('course/get', 'index');
         Route::post('course/add', 'add');
         Route::get('course/remove/{id}', 'remove');
+    }
+);
+
+Route::controller(NoticeController::class)->middleware(['auth:sanctum'])->prefix('notice')->group(
+    function(){
+        Route::post('save', 'save');
+        Route::get('delete/{id}', 'delete');
+        Route::post('change-status', 'status');
+        Route::get('publish/{id}', 'publish');
+        Route::get('show/{uri}', 'get');
+        Route::get('get/{id}', 'show');
+        Route::get('all', 'all');
+        Route::post('search', 'search');
     }
 );
