@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -12,10 +13,12 @@ class OverviewController extends BaseController
         try {
             $students = User::where('is_deleted' , 0)->where('role_id', 2)->count();
             $teachers = User::where('is_deleted' , 0)->where('role_id', 1)->count();
+            $course = Course::count();
 
             $data = [
                 'students' => $students,
-                'teachers' => $teachers
+                'teachers' => $teachers,
+                'course' => $course,
             ];
 
             return $this->sendSuccess($data, "Fetch Data Successfully");
