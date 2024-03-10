@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NoticePublish;
 use App\Models\Notice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -36,6 +37,7 @@ class NoticeController extends BaseController
                 $notice->user_id = auth()->user()->id;
                 $notice->title = $request->title;
                 $notice->caption = $request->caption;
+                $notice->textarea = $request->textarea;
                 $notice->save();
 
                 return $this->sendSuccess($notice, "Notice Save Successfully");
@@ -84,6 +86,7 @@ class NoticeController extends BaseController
                 $notice->publish_at = Carbon::now();
                 $notice->status = 1;
                 $notice->save();
+                event(new NoticePublish());
                 return $this->sendSuccess($notice, "Notice Publish Successfully");
             }
             return $this->sendError("Not Found", 404);
@@ -95,7 +98,7 @@ class NoticeController extends BaseController
     public function get($uri)
     {
         try {
-            $notice = Notice::where('uri', $uri)->first();
+            $notice = Notice::with('user')->where('uri', $uri)->first();
             if ($notice && 
             (!Notice::where('uri', $uri)->where('status' , 0)->first() || 
             Notice::where('uri', $uri)->where('user_id' , auth()->user()->id)->first()) ) {
@@ -129,11 +132,33 @@ class NoticeController extends BaseController
         }
     }
 
+    public function getAllPublish()
+    {
+        try {
+            $notice = Notice::with('user')->orderBy('updated_at' , 'desc')->where('status', 1)->get();            
+            return $this->sendSuccess($notice, "Notice Get Successfully");
+        } catch (\Throwable $th) {
+            return $this->sendError($th->getMessage(), 500);
+            // return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
     public function search(Request $request)
     {
         try {
             $notice = Notice::with('user')->where('name', 'like', '%' . $request->search . '%')->paginate(10);
             return $this->sendSuccess($notice, "Notice Fetch Successfully");
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function uploadImage(Request $request)
+    {
+        try {
+            if ($request->hasFile('file')) {
+                return response()->json(['location' =>  $request->root() . '/storage/' . $this->upload('notice', 'file')]);
+            }
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
         }

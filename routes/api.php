@@ -80,5 +80,8 @@ Route::controller(NoticeController::class)->middleware(['auth:sanctum'])->prefix
         Route::get('get/{id}', 'show');
         Route::get('all', 'all');
         Route::post('search', 'search');
+        Route::get('event/all', 'getAllPublish');
     }
 );
+
+Route::post('image-upload', [NoticeController::class, 'uploadImage']);
