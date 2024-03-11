@@ -132,7 +132,7 @@ class AuthController extends BaseController
                 if ($user->role_id == 0) {
                     $token = $user->createToken('admin-auth')->plainTextToken;
                 } elseif ($user->role_id == 1) {
-                    $token = $user->createToken('teacher-auth', ['course-crud', 'auth-edit-profile', 'all-students', 'save-notice', 'delete-notice'])->plainTextToken;
+                    $token = $user->createToken('teacher-auth', ['course-crud', 'auth-edit-profile', 'all-students', 'save-notice', 'delete-notice', 'quiz-crud'])->plainTextToken;
                 } else {
                     $token = $user->createToken('student-auth', ['all-teacher'])->plainTextToken;
                 }
