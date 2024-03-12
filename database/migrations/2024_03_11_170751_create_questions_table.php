@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('quiz_id');
             $table->string('title');
-            $table->string('img');
+            $table->string('img')->nullable();
             $table->string('type');
             $table->integer('point')->default(1);
             $table->integer('is_required')->default(0);

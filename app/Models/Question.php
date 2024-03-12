@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Question extends Model
 {
     use HasFactory;
+
+    public function inputs()
+    {
+        return $this->hasMany(QuizInput::class , 'question_id', 'id');
+    }
 }

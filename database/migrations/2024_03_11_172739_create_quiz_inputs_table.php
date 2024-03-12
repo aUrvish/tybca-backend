@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('quiz_inputs', function (Blueprint $table) {
             $table->id();
             $table->integer('question_id');
+            $table->integer('quiz_id');
             $table->string('name');
             $table->tinyInteger('is_answer')->default(0);
             $table->timestamps();

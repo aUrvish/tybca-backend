@@ -5,6 +5,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QuizController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -81,6 +82,18 @@ Route::controller(NoticeController::class)->middleware(['auth:sanctum'])->prefix
         Route::get('all', 'all');
         Route::post('search', 'search');
         Route::get('event/all', 'getAllPublish');
+    }
+);
+
+Route::controller(QuizController::class)->middleware(['auth:sanctum'])->prefix('quiz')->group(
+    function(){
+        Route::get('get/{id}', 'fetchSingle');
+        Route::post('save', 'save');
+        Route::post('question/save', 'addQue');
+        Route::post('question-input/save', 'addInput');
+        Route::get('remove/{id}', 'remove');
+        Route::get('question/remove/{id}', 'removeQue');
+        Route::get('question-input/remove/{id}', 'removeInput');
     }
 );
 

@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('quizzes', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('course_id');
+            $table->integer('user_id');
+            $table->integer('course_id');
             $table->string('uri')->unique();
             $table->timestamp('start_at')->nullable();
             $table->integer('duration')->nullable();
