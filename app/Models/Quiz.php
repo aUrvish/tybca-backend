@@ -13,4 +13,9 @@ class Quiz extends Model
     {
         return $this->hasMany(Question::class , 'quiz_id', 'id')->with('inputs');
     }
+
+    public function course()
+    {
+        return $this->hasOne(Course::class , 'id', 'course_id');
+    }
 }

@@ -67,7 +67,7 @@ class QuizController extends BaseController
                 }
                 $quiz->save();
                 
-                if ($request->id) {
+                if (!$request->id) {
                     $this->_create_default_question($quiz->id);
                 }
 
@@ -146,7 +146,7 @@ class QuizController extends BaseController
                 $que->quiz_id = $request->quiz_id;
                 $que->title = $request->title;
                 $que->type = $request->type;
-                $que->point = $request->point;
+                $que->point = $request->point ? $request->point : 1;
                 $que->is_required = $request->is_required ? 1 : 0;
                 $que->stand_index = $request->stand_index;
 
@@ -156,15 +156,17 @@ class QuizController extends BaseController
 
                 $que->save();
 
-                if ($request->id) {
+                if (!$request->id) {
                     $this->_create_default_input($request->quiz_id, $que->id);
                 }
 
-                return $this->sendSuccess($que, "Question Added Successfully");
+                $responceQue = Question::with('inputs')->find($que->id);
+                return $this->sendSuccess($responceQue, "Question Added Successfully");
             }
             return $this->sendError("Not Found", 404);
         } catch (\Throwable $th) {
-            return $this->sendError("Internal Server Error", 500);
+            // return $this->sendError("Internal Server Error", 500);
+            return $this->sendError($th->getMessage(), 500);
         }
     }
 
@@ -233,8 +235,13 @@ class QuizController extends BaseController
     public function fetchSingle(Request $request, $id) {
         try {
             if ($request->user()->tokenCan('quiz-crud')) {
-                $quiz = Quiz::find($id)->with('questions')->get();
-                return $this->sendSuccess($quiz, "Quiz Fetch Successfully");
+                $quiz = Quiz::with(['questions' => function ($q) {
+                    return $q->orderBy('stand_index');
+                },'course'])->find($id);
+                if ($quiz) {
+                    return $this->sendSuccess($quiz, "Quiz Fetch Successfully");
+                }
+                return $this->sendError("Not Found", 404);
             }
             return $this->sendError("Not Found", 404);
         } catch (\Throwable $th) {
