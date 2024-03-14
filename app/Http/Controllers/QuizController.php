@@ -8,6 +8,7 @@ use App\Models\Quiz;
 use App\Models\QuizInput;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class QuizController extends BaseController
@@ -45,7 +46,7 @@ class QuizController extends BaseController
                 }
 
                 if ($request->start_at) {
-                    $quiz->start_at = $request->start_at;
+                    $quiz->start_at = Carbon::parse($request->start_at);
                     $quiz->is_notify = $request->is_notify ? 1 : 0;
 
                     if ($request->duration) {
