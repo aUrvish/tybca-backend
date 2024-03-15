@@ -34,6 +34,11 @@ class ProfileController extends BaseController
                 'country' => 'required'
             ]);
 
+            // check email already exist
+            if (User::where('email', $request->email)->first()) {
+                return $this->sendError("Email already exists", 409);
+            }
+
             // validation error
             if ($validation->fails()) {
                 return $this->sendError("Validation Error", 403);
@@ -111,6 +116,11 @@ class ProfileController extends BaseController
                 // store details
                 $user = User::find($request->id);
                 
+                // check email already exist
+                if (User::where('email', $request->email)->first()) {
+                    return $this->sendError("Email already exists", 409);
+                }
+
                 if ($request->hasFile('avatar')) {
                     $avatar_url = $this->upload('avatar', 'avatar');
                     $user->avatar = $avatar_url;
