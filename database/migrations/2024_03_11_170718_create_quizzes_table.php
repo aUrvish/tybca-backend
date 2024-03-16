@@ -21,7 +21,7 @@ return new class extends Migration
             $table->integer('duration')->nullable();
             $table->tinyInteger('is_random')->default(0);
             $table->tinyInteger('is_notify')->default(0);
-            $table->tinyInteger('nagative_point')->default(0);
+            $table->integer('nagative_point')->default(0);
             $table->string('certi_stamp')->nullable();
             $table->string('certi_signature')->nullable();
             $table->timestamps();

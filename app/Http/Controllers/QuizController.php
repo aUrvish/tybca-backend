@@ -13,7 +13,8 @@ use Illuminate\Support\Str;
 
 class QuizController extends BaseController
 {
-    public function save(Request $request) {
+    public function save(Request $request)
+    {
         try {
 
             // validation
@@ -29,7 +30,7 @@ class QuizController extends BaseController
             if ($request->user()->tokenCan('quiz-crud')) {
                 if ($request->id) {
                     $quiz = Quiz::find($request->id);
-                }else {
+                } else {
                     $quiz = new Quiz();
                     $quiz->uri = Str::random(10);
                 }
@@ -40,34 +41,40 @@ class QuizController extends BaseController
 
                 if ($request->course_id) {
                     $quiz->course_id = $request->course_id;
-                }else {
+                } else {
                     $course = Course::first();
                     $quiz->course_id = $course->id;
                 }
 
+                $quiz->is_notify = $request->is_notify ? 1 : 0;
                 if ($request->start_at) {
                     $quiz->start_at = Carbon::parse($request->start_at);
-                    $quiz->is_notify = $request->is_notify ? 1 : 0;
 
-                    if ($request->duration) {
+                    if (!is_null($request->duration)) {
                         $quiz->duration = $request->duration;
-                    }else {
+                    } else {
                         $quiz->duration = 30;
                     }
+                } else {
+                    $quiz->start_at = null;
                 }
 
                 if ($request->nagative_point) {
                     $quiz->nagative_point = $request->nagative_point;
+                } else {
+                    $quiz->nagative_point = 0;
                 }
 
-                if ($request->hasFile('certi_stamp')) {
-                    $quiz->certi_stamp = $this->upload('stamp', 'certi_stamp');
-                }
+                // if ($request->hasFile('certi_stamp')) {
+                //     $quiz->certi_stamp = $this->upload('stamp', 'certi_stamp');
+                // }
                 if ($request->hasFile('certi_signature')) {
                     $quiz->certi_signature = $this->upload('stamp', 'certi_signature');
+                } else {
+                    $quiz->certi_signature = null;
                 }
                 $quiz->save();
-                
+
                 if (!$request->id) {
                     $this->_create_default_question($quiz->id);
                 }
@@ -76,11 +83,13 @@ class QuizController extends BaseController
             }
             return $this->sendError("Not Found", 404);
         } catch (\Throwable $th) {
-            return $this->sendError("Internal Server Error", 500);
+            return $this->sendError($th->getMessage(), 500);
+            // return $this->sendError("Internal Server Error", 500);
         }
     }
 
-    public function _create_default_question($quiz_id) {
+    public function _create_default_question($quiz_id)
+    {
         try {
             $que = new Question();
             $que->quiz_id = $quiz_id;
@@ -95,7 +104,8 @@ class QuizController extends BaseController
         }
     }
 
-    public function _create_default_input($quiz_id ,$que_id) {
+    public function _create_default_input($quiz_id, $que_id)
+    {
         try {
             $inputs = new QuizInput();
             $inputs->question_id = $que_id;
@@ -107,7 +117,8 @@ class QuizController extends BaseController
         }
     }
 
-    public function remove(Request $request, $id) {
+    public function remove(Request $request, $id)
+    {
         try {
             if ($request->user()->tokenCan('quiz-crud')) {
                 Quiz::find($id)->delete();
@@ -122,7 +133,8 @@ class QuizController extends BaseController
         }
     }
 
-    public function addQue(Request $request){
+    public function addQue(Request $request)
+    {
         try {
             // validation
             $validation = Validator::make($request->all(), [
@@ -140,7 +152,7 @@ class QuizController extends BaseController
             if ($request->user()->tokenCan('quiz-crud')) {
                 if ($request->id) {
                     $que = Question::find($request->id);
-                }else{
+                } else {
                     $que = new Question();
                 }
 
@@ -153,6 +165,8 @@ class QuizController extends BaseController
 
                 if ($request->hasFile('img')) {
                     $que->img = $this->upload('question', 'img');
+                } else {
+                    $que->img = null;
                 }
 
                 $que->save();
@@ -171,7 +185,8 @@ class QuizController extends BaseController
         }
     }
 
-    public function removeQue(Request $request, $id) {
+    public function removeQue(Request $request, $id)
+    {
         try {
             if ($request->user()->tokenCan('quiz-crud')) {
                 Question::find($id)->delete();
@@ -185,7 +200,8 @@ class QuizController extends BaseController
         }
     }
 
-    public function addInput(Request $request){
+    public function addInput(Request $request)
+    {
         try {
             // validation
             $validation = Validator::make($request->all(), [
@@ -202,7 +218,7 @@ class QuizController extends BaseController
             if ($request->user()->tokenCan('quiz-crud')) {
                 if ($request->id) {
                     $inputs = QuizInput::find($request->id);
-                }else{
+                } else {
                     $inputs = new QuizInput();
                 }
 
@@ -220,7 +236,8 @@ class QuizController extends BaseController
         }
     }
 
-    public function removeInput(Request $request, $id) {
+    public function removeInput(Request $request, $id)
+    {
         try {
             if ($request->user()->tokenCan('quiz-crud')) {
                 QuizInput::find($id)->delete();
@@ -233,12 +250,13 @@ class QuizController extends BaseController
         }
     }
 
-    public function fetchSingle(Request $request, $id) {
+    public function fetchSingle(Request $request, $id)
+    {
         try {
             if ($request->user()->tokenCan('quiz-crud')) {
                 $quiz = Quiz::with(['questions' => function ($q) {
                     return $q->orderBy('stand_index');
-                },'course'])->find($id);
+                }, 'course'])->find($id);
                 if ($quiz) {
                     return $this->sendSuccess($quiz, "Quiz Fetch Successfully");
                 }
@@ -247,6 +265,59 @@ class QuizController extends BaseController
             return $this->sendError("Not Found", 404);
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function get()
+    {
+        try {
+            $quiz = Quiz::with(['questions' => function ($q) {
+                return $q->orderBy('stand_index');
+            }, 'user', 'course'])->orderBy('updated_at', 'desc')->paginate(10);
+            return $this->sendSuccess($quiz, "Quiz Fetch Successfully");
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function getSearch(Request $request)
+    {
+        try {
+
+            $quiz = Quiz::with(['questions' => function ($q) {
+                return $q->orderBy('stand_index');
+            }, 'user', 'course'])->orderBy('updated_at', 'desc')->where('title', 'like', '%' . $request->search . '%')->paginate(10);
+            return $this->sendSuccess($quiz, "Quiz Fetch Successfully");
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function fetchTest(Request $request, $uri)
+    {
+        try {
+            $quiz = Quiz::with(['questions' => function ($q) {
+                return $q->orderBy('stand_index');
+            }, 'course'])->where('uri',$uri)->first();
+
+            $isStartDate = Carbon::parse($quiz->start_at);
+            $isEndDate = Carbon::parse($quiz->start_at)->addMinute($quiz->duration);
+            $now = Carbon::parse(Carbon::now()->timezone('Asia/Kolkata')->toDateTimeLocalString());
+            $isDateBetween = $now >= $isStartDate && $now <= $isEndDate;
+
+            if ($quiz->start_at && !$isDateBetween && auth()->user()->role_id == 2) {
+                if ($now < $isStartDate) {
+                    return $this->sendError("Quiz is in pending", 202);
+                }
+                return $this->sendError("Quiz is dead", 201);
+            }
+
+            if ($quiz) {
+                return $this->sendSuccess($quiz, "Quiz Fetch Successfully");
+            }
+        } catch (\Throwable $th) {
+            // return $this->sendError("Internal Server Error", 500);
+            return $this->sendError($th->getMessage(), 500);
         }
     }
 }

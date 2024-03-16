@@ -88,6 +88,9 @@ Route::controller(NoticeController::class)->middleware(['auth:sanctum'])->prefix
 Route::controller(QuizController::class)->middleware(['auth:sanctum'])->prefix('quiz')->group(
     function(){
         Route::get('get/{id}', 'fetchSingle');
+        Route::get('get', 'get');
+        Route::get('fetch/{uri}', 'fetchTest');
+        Route::get('search', 'getSearch');
         Route::post('save', 'save');
         Route::post('question/save', 'addQue');
         Route::post('question-input/save', 'addInput');
