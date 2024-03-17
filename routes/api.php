@@ -60,6 +60,7 @@ Route::controller(OverviewController::class)->middleware(['auth:sanctum'])->grou
         Route::get('overview/get', 'get');
         Route::get('overview/students', 'students');
         Route::get('overview/teachers', 'teachers');
+        Route::get('overview/quiz', 'quiz');
     }
 );
 
@@ -88,9 +89,11 @@ Route::controller(NoticeController::class)->middleware(['auth:sanctum'])->prefix
 Route::controller(QuizController::class)->middleware(['auth:sanctum'])->prefix('quiz')->group(
     function(){
         Route::get('get/{id}', 'fetchSingle');
+        Route::post('responce/save', 'saveResponce');
         Route::get('get', 'get');
+        Route::get('test', 'test');
         Route::get('fetch/{uri}', 'fetchTest');
-        Route::get('search', 'getSearch');
+        Route::post('search', 'getSearch');
         Route::post('save', 'save');
         Route::post('question/save', 'addQue');
         Route::post('question-input/save', 'addInput');

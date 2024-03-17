@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Quiz;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -49,5 +50,15 @@ class OverviewController extends BaseController
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
         } 
+    }
+
+    public function quiz()
+    {
+        try {
+            $quiz = Quiz::with(['questions', 'course'])->orderBy('updated_at', 'desc')->take(5)->get();
+            return $this->sendSuccess($quiz, "Quiz Fetch Successfully");
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
     }
 }

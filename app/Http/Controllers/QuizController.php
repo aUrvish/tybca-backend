@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Entrie;
 use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuizInput;
+use App\Models\Responce;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+
+use function PHPUnit\Framework\isNull;
 
 class QuizController extends BaseController
 {
@@ -47,7 +51,7 @@ class QuizController extends BaseController
                 }
 
                 $quiz->is_notify = $request->is_notify ? 1 : 0;
-                if ($request->start_at) {
+                if ($request->start_at != 'null') {
                     $quiz->start_at = Carbon::parse($request->start_at);
 
                     if (!is_null($request->duration)) {
@@ -83,8 +87,7 @@ class QuizController extends BaseController
             }
             return $this->sendError("Not Found", 404);
         } catch (\Throwable $th) {
-            return $this->sendError($th->getMessage(), 500);
-            // return $this->sendError("Internal Server Error", 500);
+            return $this->sendError("Internal Server Error", 500);
         }
     }
 
@@ -180,8 +183,7 @@ class QuizController extends BaseController
             }
             return $this->sendError("Not Found", 404);
         } catch (\Throwable $th) {
-            // return $this->sendError("Internal Server Error", 500);
-            return $this->sendError($th->getMessage(), 500);
+            return $this->sendError("Internal Server Error", 500);
         }
     }
 
@@ -271,9 +273,17 @@ class QuizController extends BaseController
     public function get()
     {
         try {
-            $quiz = Quiz::with(['questions' => function ($q) {
-                return $q->orderBy('stand_index');
-            }, 'user', 'course'])->orderBy('updated_at', 'desc')->paginate(10);
+            $quiz = Quiz::with(['questions', 'user', 'course'])->orderBy('updated_at', 'desc')->paginate(10);
+            return $this->sendSuccess($quiz, "Quiz Fetch Successfully");
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function test()
+    {
+        try {
+            $quiz = Quiz::with(['questions', 'user', 'course'])->orderBy('updated_at', 'desc')->get();
             return $this->sendSuccess($quiz, "Quiz Fetch Successfully");
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
@@ -300,6 +310,37 @@ class QuizController extends BaseController
                 return $q->orderBy('stand_index');
             }, 'course'])->where('uri',$uri)->first();
 
+            $entrie = Entrie::where('quiz_id' , $quiz->id)->where('user_id' , auth()->user()->id)->first();
+
+            if (auth()->user()->role_id == 2 && $entrie) {
+                return $this->sendSuccess([],"Already Responded", 205);
+            }
+
+            $isStartDate = Carbon::parse($quiz->start_at);
+            $isEndDate = Carbon::parse($quiz->start_at)->addMinute($quiz->duration);
+            $now = Carbon::parse(Carbon::now()->timezone('Asia/Kolkata')->toDateTimeLocalString());
+            $isDateBetween = $now >= $isStartDate && $now <= $isEndDate;
+
+            if ($quiz->start_at && !$isDateBetween && auth()->user()->role_id == 2) {
+                if ($now < $isStartDate) {
+                    return $this->sendSuccess(['start_at' =>  $quiz->start_at] ,"Quiz is in pending", 202);
+                }
+                return $this->sendSuccess([],"Quiz is dead", 201);
+            }
+
+            if ($quiz) {
+                return $this->sendSuccess($quiz, "Quiz Fetch Successfully");
+            }
+        } catch (\Throwable $th) {
+            // return $this->sendError("Internal Server Error", 500);
+            return $this->sendError($th->getMessage(), 500);
+        }
+    }
+
+    public function saveResponce(Request $request)
+    {
+        try {
+            $quiz = Quiz::find($request->quiz_id);
             $isStartDate = Carbon::parse($quiz->start_at);
             $isEndDate = Carbon::parse($quiz->start_at)->addMinute($quiz->duration);
             $now = Carbon::parse(Carbon::now()->timezone('Asia/Kolkata')->toDateTimeLocalString());
@@ -309,15 +350,30 @@ class QuizController extends BaseController
                 if ($now < $isStartDate) {
                     return $this->sendError("Quiz is in pending", 202);
                 }
-                return $this->sendError("Quiz is dead", 201);
+                return $this->sendError("Quiz is dead", 404);
             }
 
-            if ($quiz) {
-                return $this->sendSuccess($quiz, "Quiz Fetch Successfully");
+            $entrie = new Entrie();
+            $entrie->user_id = auth()->user()->id;
+            $entrie->quiz_id = $request->quiz_id;
+
+            if (auth()->user()->role_id == 2) {
+                $entrie->save();
             }
+
+            if ($entrie->id) {
+                foreach($request->responce as $responce ){
+                    $res = new Responce();
+                    $res->entries_id = $entrie->id;
+                    $res->que_id = $responce['que_id'];
+                    $res->option_id = $responce['option_id'];
+                    $res->save();
+                }
+            }
+
+            return $this->sendSuccess([], "Responce Save Successfully");
         } catch (\Throwable $th) {
-            // return $this->sendError("Internal Server Error", 500);
-            return $this->sendError($th->getMessage(), 500);
+            return $this->sendError("Internal Server Error", 500);
         }
     }
 }
