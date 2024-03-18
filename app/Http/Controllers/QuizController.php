@@ -40,7 +40,18 @@ class QuizController extends BaseController
                 }
 
                 $quiz->title = $request->title;
-                $quiz->is_random = $request->is_random ? 1 : 0;
+                if ($request->is_random == 'true' || $request->is_random == 1) {
+                    $quiz->is_random = 1;
+                }else {
+                    $quiz->is_random = 0;
+                }
+
+                if ($request->is_notify == 'true' || $request->is_notify == 1) {
+                    $quiz->is_notify = 1;
+                }else {
+                    $quiz->is_notify = 0;
+                }
+
                 $quiz->user_id = auth()->user()->id;
 
                 if ($request->course_id) {
@@ -50,7 +61,6 @@ class QuizController extends BaseController
                     $quiz->course_id = $course->id;
                 }
 
-                $quiz->is_notify = $request->is_notify ? 1 : 0;
                 if ($request->start_at != 'null') {
                     $quiz->start_at = Carbon::parse($request->start_at);
 
@@ -306,9 +316,7 @@ class QuizController extends BaseController
     public function fetchTest(Request $request, $uri)
     {
         try {
-            $quiz = Quiz::with(['questions' => function ($q) {
-                return $q->orderBy('stand_index');
-            }, 'course'])->where('uri',$uri)->first();
+            $quiz = Quiz::where('uri',$uri)->first();
 
             $entrie = Entrie::where('quiz_id' , $quiz->id)->where('user_id' , auth()->user()->id)->first();
 
@@ -328,12 +336,21 @@ class QuizController extends BaseController
                 return $this->sendSuccess([],"Quiz is dead", 201);
             }
 
+            if ($quiz->is_random) {
+                $responceQuiz = Quiz::where('uri',$uri)->with(['questions' => function ($q) {
+                    return $q->inRandomOrder();
+                }, 'course'])->first();
+            }else {
+                $responceQuiz = Quiz::where('uri',$uri)->with(['questions' => function ($q) {
+                    return $q->orderBy('stand_index');
+                }, 'course'])->first();
+            }
+
             if ($quiz) {
-                return $this->sendSuccess($quiz, "Quiz Fetch Successfully");
+                return $this->sendSuccess($responceQuiz, "Quiz Fetch Successfully");
             }
         } catch (\Throwable $th) {
-            // return $this->sendError("Internal Server Error", 500);
-            return $this->sendError($th->getMessage(), 500);
+            return $this->sendError("Internal Server Error", 500);
         }
     }
 
@@ -372,6 +389,46 @@ class QuizController extends BaseController
             }
 
             return $this->sendSuccess([], "Responce Save Successfully");
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function getResponce(Request $request,$quiz_id)
+    {
+        try {
+            if ($request->user()->tokenCan('quiz-crud')) { 
+                $entrie = Entrie::where('quiz_id', $quiz_id)->orderBy('created_at', 'desc')->with('user')->paginate();
+                return $this->sendSuccess($entrie, "Responce Fetch Successfully");
+            }
+            return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+    
+    public function getSingleResponce(Request $request,$id)
+    {
+        try {
+            if ($request->user()->tokenCan('quiz-crud')) { 
+                $responce = Responce::where('entries_id', $id)->with(['question', 'input'])->get();
+                return $this->sendSuccess($responce, "Responce Fetch Successfully");
+            }
+            return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function removeResponce(Request $request,$id)
+    {
+        try {
+            if ($request->user()->tokenCan('quiz-crud')) { 
+                Entrie::find($id)->delete();
+                Responce::where('entries_id',$id)->delete();
+                return $this->sendSuccess([], "Responce Delete Successfully");
+            }
+            return $this->sendError("Not Found", 404);
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
         }

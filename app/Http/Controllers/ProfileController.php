@@ -14,7 +14,7 @@ class ProfileController extends BaseController
     {
         try {
             $id = auth()->user()->id;
-            $user = User::where('is_deleted' , 0)->with('course')->where('id', $id)->first();
+            $user = User::where('is_deleted', 0)->with('course')->where('id', $id)->first();
             return $this->sendSuccess($user, "User Data");
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
@@ -35,7 +35,7 @@ class ProfileController extends BaseController
             ]);
 
             // check email already exist
-            if (User::where('email', $request->email)->first()) {
+            if (User::where('email', $request->email)->where('id', '<>', auth()->user()->id)->first()) {
                 return $this->sendError("Email already exists", 409);
             }
 
@@ -44,15 +44,15 @@ class ProfileController extends BaseController
                 return $this->sendError("Validation Error", 403);
             }
 
-            if ($request->user()->tokenCan('auth-edit-profile')){
+            if ($request->user()->tokenCan('auth-edit-profile')) {
                 // store details
                 $user = User::find(auth()->user()->id);
-                
+
                 if ($request->hasFile('avatar')) {
                     $avatar_url = $this->upload('avatar', 'avatar');
                     $user->avatar = $avatar_url;
                 }
-                
+
                 $user->name = $request->name;
                 $user->email = $request->email;
                 $user->mobile = $request->mobile;
@@ -61,34 +61,36 @@ class ProfileController extends BaseController
                 $user->country = $request->country;
                 $user->save();
 
-                $courseArr = explode(",",$request->courses);
-                $subCourse = SubscribeCourse::where('user_id', $user->id)->get();
+                if ($request->courses) {
+                    $courseArr = explode(",", $request->courses);
+                    $subCourse = SubscribeCourse::where('user_id', $user->id)->get();
 
-                foreach ($courseArr as $course_id) {
-                    $coursePresent = SubscribeCourse::where('user_id', $user->id)->where('course_id', $course_id)->first();
+                    foreach ($courseArr as $course_id) {
+                        $coursePresent = SubscribeCourse::where('user_id', $user->id)->where('course_id', $course_id)->first();
 
-                    if (!$coursePresent) {
-                        $subCourses = new SubscribeCourse();
-                        $subCourses->user_id = $user->id;
-                        $subCourses->course_id = $course_id;
-                        $subCourses->save();
+                        if (!$coursePresent) {
+                            $subCourses = new SubscribeCourse();
+                            $subCourses->user_id = $user->id;
+                            $subCourses->course_id = $course_id;
+                            $subCourses->save();
+                        }
                     }
-                }
-
-                if ($subCourse) {
-                    foreach ($subCourse as $subscribe) {
-                        if (!in_array($subscribe->course_id, $courseArr)) {
-                            SubscribeCourse::find($subscribe->id)->delete();
+                    if ($subCourse) {
+                        foreach ($subCourse as $subscribe) {
+                            if (!in_array($subscribe->course_id, $courseArr)) {
+                                SubscribeCourse::find($subscribe->id)->delete();
+                            }
                         }
                     }
                 }
-
+                    
                 return $this->sendSuccess([], "Student Updated Successfully");
             }
 
             return $this->sendError("Not Found", 404);
         } catch (\Throwable $th) {
-            return $this->sendError("Internal Server Error", 500);
+            // return $this->sendError("Internal Server Error", 500);
+            return $this->sendError($th->getMessage(), 500);
         }
     }
 
@@ -112,12 +114,12 @@ class ProfileController extends BaseController
                 return $this->sendError("Validation Error", 403);
             }
 
-            if ($request->user()->tokenCan('edit-profiles')){
+            if ($request->user()->tokenCan('edit-profiles')) {
                 // store details
                 $user = User::find($request->id);
-                
+
                 // check email already exist
-                if (User::where('email', $request->email)->first()) {
+                if (User::where('email', $request->email)->where('id', '<>', $request->id)->first()) {
                     return $this->sendError("Email already exists", 409);
                 }
 
@@ -125,11 +127,11 @@ class ProfileController extends BaseController
                     $avatar_url = $this->upload('avatar', 'avatar');
                     $user->avatar = $avatar_url;
                 }
-                
+
                 if ($request->role == "teacher") {
                     $user->role_id = 1;
                 }
-                
+
                 $user->name = $request->name;
                 $user->email = $request->email;
                 $user->mobile = $request->mobile;
@@ -138,7 +140,7 @@ class ProfileController extends BaseController
                 $user->country = $request->country;
                 $user->save();
 
-                $courseArr = explode(",",$request->courses);
+                $courseArr = explode(",", $request->courses);
                 $subCourse = SubscribeCourse::where('user_id', $request->id)->get();
 
                 foreach ($courseArr as $course_id) {
@@ -169,16 +171,16 @@ class ProfileController extends BaseController
         }
     }
 
-    public function userProfile(Request $request, $id) {
+    public function userProfile(Request $request, $id)
+    {
         try {
-            if ($request->user()->tokenCan('show-profiles')){
-                $user = User::with('course')->where('is_deleted' , 0)->where('id', $id)->first();
-                return $this->sendSuccess($user, "Profile fetched Successfully"); 
+            if ($request->user()->tokenCan('show-profiles')) {
+                $user = User::with('course')->where('is_deleted', 0)->where('id', $id)->first();
+                return $this->sendSuccess($user, "Profile fetched Successfully");
             }
             return $this->sendError("Not Found", 404);
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
         }
     }
-
 }

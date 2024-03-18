@@ -100,6 +100,9 @@ Route::controller(QuizController::class)->middleware(['auth:sanctum'])->prefix('
         Route::get('remove/{id}', 'remove');
         Route::get('question/remove/{id}', 'removeQue');
         Route::get('question-input/remove/{id}', 'removeInput');
+        Route::get('responce/all/{quiz_id}', 'getResponce');
+        Route::get('responce/get/{id}', 'getSingleResponce');
+        Route::get('responce/remove/{id}', 'removeResponce');
     }
 );
 
