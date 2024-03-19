@@ -16,6 +16,6 @@ class Entrie extends Model
 
     public function responce()
     {
-        return $this->hasMany(Responce::class , 'entries_id', 'id');
+        return $this->hasMany(Responce::class , 'entries_id', 'id')->with(['question', 'input']);
     }
 }
