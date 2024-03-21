@@ -399,7 +399,6 @@ class QuizController extends BaseController
 
             if (auth()->user()->role_id == 2) {
                 $entrie->save();
-                $result = $this->_calculate_score($entrie->id, $quiz->course_id);
             }
 
             if ($entrie->id) {
@@ -410,9 +409,15 @@ class QuizController extends BaseController
                     $res->option_id = $responce['option_id'];
                     $res->save();
                 }
+
+                if(auth()->user()->role_id == 2){
+                    $result = $this->_calculate_score($entrie->id, $quiz->course_id);
+                }
+
             }
 
-            return $this->sendSuccess($result ? $result : [], "Responce Save Successfully");
+
+            return $this->sendSuccess(isset($result) ? $result : [], "Responce Save Successfully");
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
         }
