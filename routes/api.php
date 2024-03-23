@@ -90,6 +90,7 @@ Route::controller(QuizController::class)->middleware(['auth:sanctum'])->prefix('
     function(){
         Route::get('get/{id}', 'fetchSingle');
         Route::post('responce/save', 'saveResponce');
+        Route::get('result/get', 'getResult');
         Route::get('get', 'get');
         Route::get('test', 'test');
         Route::get('fetch/{uri}', 'fetchTest');

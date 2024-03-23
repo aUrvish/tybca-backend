@@ -62,7 +62,7 @@ class QuizController extends BaseController
                     $notice->user_id = auth()->user()->id;
 
                     $course = Course::find($quiz->course_id);
-                    $title = $course->name . "MCQ Exam Notice";
+                    $title = $course->name . " MCQ Exam Notice";
                     $notice->title = $title;
                     $notice->caption = $title;
                     $notice->uri = Str::random(10);
@@ -306,7 +306,7 @@ class QuizController extends BaseController
     public function get()
     {
         try {
-            $quiz = Quiz::with(['questions', 'user', 'course'])->orderBy('updated_at', 'desc')->paginate(10);
+            $quiz = Quiz::with(['questions', 'user', 'course'])->orderBy('updated_at', 'desc')->orderBy('updated_at', 'desc')->paginate(10);
             return $this->sendSuccess($quiz, "Quiz Fetch Successfully");
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
@@ -517,8 +517,21 @@ class QuizController extends BaseController
             ];
 
         } catch (\Throwable $th) {
-            // return $this->sendError("Internal Server Error", 500);
-            return $this->sendError($th->getMessage(), 500);
+            return $this->sendError("Internal Server Error", 500);
         }
     }
+
+    public function getResult() { 
+
+        try {            
+            $result = Result::with('course', 'user', 'quiz')->where('user_id', auth()->user()->id)->get();
+            $data = $result->filter( function($curr) {
+                return $curr['max'] != 0 ? ($curr['score'] * 100 / $curr['max'] < 33 ? false : true) : false;
+            })->values();
+
+            return $this->sendSuccess($data, "Responce Fetch Successfully");
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    } 
 }

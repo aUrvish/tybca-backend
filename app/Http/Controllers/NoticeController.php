@@ -123,7 +123,7 @@ class NoticeController extends BaseController
     public function all()
     {
         try {
-            $noticePublish = Notice::with('user')->where('status', 1)->get();
+            $noticePublish = Notice::with('user')->where('status', 1)->orderBy('updated_at', 'desc')->get();
             $noticeDraf = Notice::orderBy('updated_at', 'desc')->with('user')->where('status', 0)->where('user_id', auth()->user()->id)->get();
             $notice = $noticeDraf->merge($noticePublish)->paginate(10);
             return $this->sendSuccess($notice, "Notice Get Successfully");

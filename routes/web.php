@@ -18,4 +18,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/score', [QuizController::class, '_calculate_score']);
+Route::get('/score', [QuizController::class, 'getResult']);
