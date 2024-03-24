@@ -146,7 +146,7 @@ class NoticeController extends BaseController
     public function search(Request $request)
     {
         try {
-            $notice = Notice::with('user')->where('name', 'like', '%' . $request->search . '%')->paginate(10);
+            $notice = Notice::with('user')->where('title', 'like', '%' . $request->search . '%')->paginate(10);
             return $this->sendSuccess($notice, "Notice Fetch Successfully");
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);

@@ -534,4 +534,18 @@ class QuizController extends BaseController
             return $this->sendError("Internal Server Error", 500);
         }
     } 
+
+    public function getUserResult($id) { 
+
+        try {            
+            $result = Result::with('course', 'user', 'quiz')->where('user_id', $id)->get();
+            $data = $result->filter( function($curr) {
+                return $curr['max'] != 0 ? ($curr['score'] * 100 / $curr['max'] < 33 ? false : true) : false;
+            })->values();
+
+            return $this->sendSuccess($data, "Responce Fetch Successfully");
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    } 
 }

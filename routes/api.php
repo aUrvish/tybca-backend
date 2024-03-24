@@ -39,7 +39,9 @@ Route::controller(AuthController::class)->prefix('auth')->group(
             Route::get('teachers/get', 'teacherShow');
             Route::get('staff/get', 'staffShow');
             Route::post('teachers/search', 'teacherSearch');
+            Route::post('teachers/filter', 'teacherFilter');
             Route::post('students/search', 'studentSearch');
+            Route::post('students/filter', 'studentFilter');
             Route::post('staff/search', 'staffSearch');
             Route::post('disable', 'userDisbale');
         });
@@ -52,6 +54,8 @@ Route::controller(ProfileController::class)->middleware(['auth:sanctum'])->group
         Route::get('profile/{id}', 'userProfile');
         Route::post('profiles-edit', 'profilesEdit');
         Route::post('auth-profiles-edit', 'authProfileEdit');
+        Route::get('profile/activity/{id}', 'userProfileQuiz');
+        Route::get('profile/activity/all/get', 'profileQuiz');
     }
 );
 
@@ -91,6 +95,7 @@ Route::controller(QuizController::class)->middleware(['auth:sanctum'])->prefix('
         Route::get('get/{id}', 'fetchSingle');
         Route::post('responce/save', 'saveResponce');
         Route::get('result/get', 'getResult');
+        Route::get('result/user/get/{id}', 'getUserResult');
         Route::get('get', 'get');
         Route::get('test', 'test');
         Route::get('fetch/{uri}', 'fetchTest');

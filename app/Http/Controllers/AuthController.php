@@ -299,6 +299,29 @@ class AuthController extends BaseController
         }
     }
 
+    public function studentFilter(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('all-students')) {                    
+                $subscribeCourse = collect(SubscribeCourse::where('course_id', $request->course_id)->with(['user' => function($q) {
+                    $q->where('role_id', 2)->where('is_deleted', 0);
+                }])->get());
+
+                $subscribeCourse = $subscribeCourse->map(function($curr) {
+                    return $curr['user'];
+                });
+
+                $subscribeCourse = $subscribeCourse->filter(function($curr) {
+                    return $curr;
+                });
+                return $this->sendSuccess($subscribeCourse->paginate(10), "Students Filter Successfully");
+            }
+            return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
     public function teacherShow(Request $request)
     {
         try {
@@ -323,6 +346,30 @@ class AuthController extends BaseController
                     ->paginate(10);
                 return $this->sendSuccess($students, "Teachers Fetch Successfully");
             }
+            return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function teacherFilter(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('all-teacher')) {                    
+                $subscribeCourse = collect(SubscribeCourse::where('course_id', $request->course_id)->with(['user' => function($q) {
+                    $q->where('role_id', 1)->where('is_deleted', 0);
+                }])->get());
+
+                $subscribeCourse = $subscribeCourse->map(function($curr) {
+                    return $curr['user'];
+                });
+
+                $subscribeCourse = $subscribeCourse->filter(function($curr) {
+                    return $curr;
+                });
+                return $this->sendSuccess($subscribeCourse->paginate(10), "Teachers Filter Successfully");
+            }
+            return $this->sendError("Not Found", 404);
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
         }

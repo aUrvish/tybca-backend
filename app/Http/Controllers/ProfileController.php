@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Quiz;
 use App\Models\SubscribeCourse;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -179,6 +180,29 @@ class ProfileController extends BaseController
                 return $this->sendSuccess($user, "Profile fetched Successfully");
             }
             return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function userProfileQuiz(Request $request, $id)
+    {
+        try {
+            if ($request->user()->tokenCan('show-profiles')) {
+                $quiz = Quiz::where('user_id', $id)->with('course')->orderBy('updated_at', 'desc')->get();
+                return $this->sendSuccess($quiz, "Profile fetched Successfully");
+            }
+            return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function profileQuiz()
+    {
+        try {
+            $quiz = Quiz::where('user_id', auth()->user()->id)->with('course')->orderBy('updated_at', 'desc')->get();
+            return $this->sendSuccess($quiz, "User Data");
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
         }
