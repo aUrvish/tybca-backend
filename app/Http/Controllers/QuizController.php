@@ -84,7 +84,7 @@ class QuizController extends BaseController
                     $quiz->course_id = $course->id;
                 }
 
-                if ($request->start_at != 'null') {
+                if ($request->start_at != 'null' && $request->start_at) {
                     $quiz->start_at = Carbon::parse($request->start_at);
 
                     if (!is_null($request->duration)) {
@@ -107,9 +107,10 @@ class QuizController extends BaseController
                 // }
                 if ($request->hasFile('certi_signature')) {
                     $quiz->certi_signature = $this->upload('stamp', 'certi_signature');
-                } else {
-                    $quiz->certi_signature = null;
+                }else {
+                    $quiz->certi_signature = $request->certi_signature;
                 }
+
                 $quiz->save();
 
                 if (!$request->id) {
@@ -120,7 +121,7 @@ class QuizController extends BaseController
             }
             return $this->sendError("Not Found", 404);
         } catch (\Throwable $th) {
-            return $this->sendError("Internal Server Error", 500);
+            return $this->sendError($th->getMessage(), 500);
         }
     }
 
@@ -196,7 +197,7 @@ class QuizController extends BaseController
                 $que->title = $request->title;
                 $que->type = $request->type;
                 $que->point = $request->point ? $request->point : 1;
-                $que->is_required = $request->is_required ? 1 : 0;
+                $que->is_required = ($request->is_required && $request->is_required != 'false') ? 1 : 0;
                 $que->stand_index = $request->stand_index;
 
                 if ($request->hasFile('img')) {
