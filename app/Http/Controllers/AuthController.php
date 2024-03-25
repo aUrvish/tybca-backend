@@ -132,7 +132,7 @@ class AuthController extends BaseController
                 if ($user->role_id == 0) {
                     $token = $user->createToken('admin-auth')->plainTextToken;
                 } elseif ($user->role_id == 1) {
-                    $token = $user->createToken('teacher-auth', ['course-crud', 'auth-edit-profile', 'all-students', 'save-notice', 'delete-notice', 'quiz-crud', 'show-profiles'])->plainTextToken;
+                    $token = $user->createToken('teacher-auth', ['course-crud', 'auth-edit-profile', 'all-students', 'save-notice', 'delete-notice', 'quiz-crud', 'show-profiles' , 'all-teacher'])->plainTextToken;
                 } else {
                     $token = $user->createToken('student-auth', ['all-teacher'])->plainTextToken;
                 }
@@ -396,6 +396,7 @@ class AuthController extends BaseController
                     ->get();
                 return $this->sendSuccess($students, "Teachers Fetch Successfully");
             }
+            return $this->sendError("Not Found", 404);
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
         }

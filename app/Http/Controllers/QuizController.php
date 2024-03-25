@@ -530,7 +530,7 @@ class QuizController extends BaseController
                 return $curr['max'] != 0 ? ($curr['score'] * 100 / $curr['max'] < 33 ? false : true) : false;
             })->values();
 
-            return $this->sendSuccess($data, "Responce Fetch Successfully");
+            return $this->sendSuccess($result, "Responce Fetch Successfully");
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
         }
@@ -544,7 +544,7 @@ class QuizController extends BaseController
                 return $curr['max'] != 0 ? ($curr['score'] * 100 / $curr['max'] < 33 ? false : true) : false;
             })->values();
 
-            return $this->sendSuccess($data, "Responce Fetch Successfully");
+            return $this->sendSuccess($result, "Responce Fetch Successfully");
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
         }
