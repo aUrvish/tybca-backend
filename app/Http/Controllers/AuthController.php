@@ -427,7 +427,11 @@ class AuthController extends BaseController
                 $user->save();
 
                 DB::table('personal_access_tokens')->where('tokenable_id', $request->id)->delete();
-                return $this->sendSuccess([], "User Disable Successfully");
+                if ($user->disable == 1) {
+                    return $this->sendSuccess([], "User Disable Successfully");
+                }else {
+                    return $this->sendSuccess([], "User Enable Successfully");
+                }
             }
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);

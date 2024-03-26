@@ -11,6 +11,7 @@ use App\Models\Quiz;
 use App\Models\QuizInput;
 use App\Models\Responce;
 use App\Models\Result;
+use App\Models\SubscribeCourse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -80,8 +81,9 @@ class QuizController extends BaseController
                 if ($request->course_id) {
                     $quiz->course_id = $request->course_id;
                 } else {
-                    $course = Course::first();
-                    $quiz->course_id = $course->id;
+                    // $course = Course::first();
+                    $course = SubscribeCourse::where('user_id', auth()->user()->id)->first();
+                    $quiz->course_id = $course->course_id;
                 }
 
                 if ($request->start_at != 'null' && $request->start_at) {
