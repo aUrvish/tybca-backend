@@ -89,7 +89,7 @@ class QuizController extends BaseController
                 if ($request->start_at != 'null' && $request->start_at) {
                     $quiz->start_at = Carbon::parse($request->start_at);
 
-                    if (!is_null($request->duration)) {
+                    if (!is_null($request->duration) && $request->duration != 'null') {
                         $quiz->duration = $request->duration;
                     } else {
                         $quiz->duration = 30;
@@ -123,7 +123,7 @@ class QuizController extends BaseController
             }
             return $this->sendError("Not Found", 404);
         } catch (\Throwable $th) {
-            return $this->sendError($th->getMessage(), 500);
+            return $this->sendError("Internal Server Error", 500);
         }
     }
 
