@@ -9,6 +9,7 @@ use App\Models\SubscribeCourse;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -43,12 +44,13 @@ class AuthController extends BaseController
                 }
 
                 // genrate username and password
-                $password = fake()->unique()->password();
-                $username = fake()->unique()->userName();
+                $password = Str::password(8, true, true, false);
+                $username = Str::lower(Str::replace(" ", '', $request->name) . Str::random(5));
 
                 // store details
                 $user = new User();
                 $user->username = $username;
+                $user->visible_password = $password;
                 $user->password = Hash::make($password);
 
                 if ($request->hasFile('avatar')) {
@@ -58,7 +60,6 @@ class AuthController extends BaseController
 
                 if ($request->role == "teacher") {
                     $user->role_id = 1;
-
                 }
 
                 $user->name = $request->name;
@@ -70,11 +71,11 @@ class AuthController extends BaseController
                 $user->save();
 
                 if ($request->courses) {
-                    $courseArr = explode(",",$request->courses);
-                    
+                    $courseArr = explode(",", $request->courses);
+
                     foreach ($courseArr as $course_id) {
                         $coursePresent = SubscribeCourse::where('user_id', $user->id)->where('course_id', $course_id)->first();
-                        
+
                         if (!$coursePresent) {
                             $subCourse = new SubscribeCourse();
                             $subCourse->user_id = $user->id;
@@ -119,18 +120,24 @@ class AuthController extends BaseController
             }
 
             // check user credentials
-            $user = User::where('username', $request->username)->first();
+            $user = User::where('is_deleted', 0)->where('username', $request->username)->first();
+
+            if ($user && $user->disable == 1) {
+                return $this->sendError("Account Disable", 404);
+            }
+
             if ($user && Hash::check($request->password, $user->password)) {
 
                 $token = null;
                 if ($user->role_id == 0) {
                     $token = $user->createToken('admin-auth')->plainTextToken;
                 } elseif ($user->role_id == 1) {
-                    $token = $user->createToken('teacher-auth', ['course-crud', 'auth-edit-profile'])->plainTextToken;
+                    $token = $user->createToken('teacher-auth', ['course-crud', 'auth-edit-profile', 'all-students', 'save-notice', 'delete-notice', 'quiz-crud', 'show-profiles' , 'all-teacher'])->plainTextToken;
                 } else {
-                    $token = $user->createToken('student-auth', [])->plainTextToken;
+                    $token = $user->createToken('student-auth', ['all-teacher'])->plainTextToken;
                 }
-
+                $user->status = 1;
+                $user->save();
                 return $this->sendSuccess(['user' => $user, 'token' => $token], "Login Successful");
             }
 
@@ -144,7 +151,15 @@ class AuthController extends BaseController
     public function logout()
     {
         try {
-            auth()->user()->tokens()->delete();
+
+            $able = DB::table('personal_access_tokens')->where('tokenable_id', auth()->user()->id)->count();
+            if ($able < 2) {
+                $user = User::find(auth()->user()->id);
+                $user->status = 0;
+                $user->save();
+            }
+
+            auth()->user()->currentAccessToken()->delete();
             return $this->sendSuccess([], "Logout Successful");
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
@@ -166,6 +181,7 @@ class AuthController extends BaseController
 
             // change password
             $user = auth()->user();
+            $user->visible_password = $request->password;
             $user->password = Hash::make($request->password);
             $user->save();
 
@@ -189,7 +205,7 @@ class AuthController extends BaseController
                 return $this->sendError("Validation Error", 403);
             }
 
-            $user = User::where('email', $request->email)->first();
+            $user = User::where('is_deleted', 0)->where('email', $request->email)->first();
             if (!$user) {
                 return $this->sendError("User Not Found", 404);
             }
@@ -239,14 +255,184 @@ class AuthController extends BaseController
             }
 
             // change password
-            $user = User::where('email', $resetPassword->email)->first();
+            $user = User::where('is_deleted', 0)->where('email', $resetPassword->email)->first();
             $user->password = Hash::make($request->password);
+            $user->visible_password = $request->password;
             $user->save();
 
             // delete token
             PasswordResetToken::where('email', $resetPassword->email)->delete();
 
             return $this->sendSuccess([], "Password Changed Successfully");
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function studentShow(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('all-students')) {
+                $students = User::with('course')->where('is_deleted', 0)->where('role_id', 2)->orderBy('updated_at', 'desc')->paginate(10);
+                return $this->sendSuccess($students, "Students Fetch Successfully");
+            }
+            return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function studentSearch(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('all-students')) {
+                $students = User::with('course')
+                    ->where('is_deleted', 0)
+                    ->where('role_id', 2)
+                    ->where('name', 'like', '%' . $request->search . '%')
+                    ->paginate(10);
+                return $this->sendSuccess($students, "Students Fetch Successfully");
+            }
+            return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function studentFilter(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('all-students')) {                    
+                $subscribeCourse = collect(SubscribeCourse::where('course_id', $request->course_id)->with(['user' => function($q) {
+                    $q->where('role_id', 2)->where('is_deleted', 0);
+                }])->get());
+
+                $subscribeCourse = $subscribeCourse->map(function($curr) {
+                    return $curr['user'];
+                });
+
+                $subscribeCourse = $subscribeCourse->filter(function($curr) {
+                    return $curr;
+                });
+                return $this->sendSuccess($subscribeCourse->paginate(10), "Students Filter Successfully");
+            }
+            return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function teacherShow(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('all-teacher')) {
+                $students = User::with('course')->where('is_deleted', 0)->where('role_id', 1)->orderBy('updated_at', 'desc')->paginate(10);
+                return $this->sendSuccess($students, "Teachers Fetch Successfully");
+            }
+            return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function teacherSearch(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('all-teacher')) {
+                $students = User::with('course')
+                    ->where('is_deleted', 0)
+                    ->where('role_id', 1)
+                    ->where('name', 'like', '%' . $request->search . '%')
+                    ->paginate(10);
+                return $this->sendSuccess($students, "Teachers Fetch Successfully");
+            }
+            return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function teacherFilter(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('all-teacher')) {                    
+                $subscribeCourse = collect(SubscribeCourse::where('course_id', $request->course_id)->with(['user' => function($q) {
+                    $q->where('role_id', 1)->where('is_deleted', 0);
+                }])->get());
+
+                $subscribeCourse = $subscribeCourse->map(function($curr) {
+                    return $curr['user'];
+                });
+
+                $subscribeCourse = $subscribeCourse->filter(function($curr) {
+                    return $curr;
+                });
+                return $this->sendSuccess($subscribeCourse->paginate(10), "Teachers Filter Successfully");
+            }
+            return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function staffShow(Request $request)
+    {
+        try {
+            $students = User::with('course')->where('is_deleted', 0)->orderBy('updated_at', 'desc')->where('role_id', 1)->get();
+            return $this->sendSuccess($students, "Teachers Fetch Successfully");
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function staffSearch(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('all-teacher')) {
+                $students = User::with('course')
+                    ->where('is_deleted', 0)
+                    ->where('role_id', 1)
+                    ->where('name', 'like', '%' . $request->search . '%')
+                    ->get();
+                return $this->sendSuccess($students, "Teachers Fetch Successfully");
+            }
+            return $this->sendError("Not Found", 404);
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function remove(Request $request, $id)
+    {
+        try {
+            if ($request->user()->tokenCan('auth-remove')) {
+                $user = User::find($id);
+                $user->is_deleted = 1;
+                $user->save();
+
+                DB::table('personal_access_tokens')->where('tokenable_id', $user->id)->delete();
+                return $this->sendSuccess([], "User Remove Successfully");
+            }
+        } catch (\Throwable $th) {
+            return $this->sendError("Internal Server Error", 500);
+        }
+    }
+
+    public function userDisbale(Request $request)
+    {
+        try {
+            if ($request->user()->tokenCan('auth-disable')) {
+                $user = User::find($request->id);
+                $user->disable = $request->status ? 1 : 0;
+                $user->save();
+
+                DB::table('personal_access_tokens')->where('tokenable_id', $request->id)->delete();
+                if ($user->disable == 1) {
+                    return $this->sendSuccess([], "User Disable Successfully");
+                }else {
+                    return $this->sendSuccess([], "User Enable Successfully");
+                }
+            }
         } catch (\Throwable $th) {
             return $this->sendError("Internal Server Error", 500);
         }
