@@ -7,10 +7,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 
-class TenantUser extends Authenticatable
+class RootUser extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
-    protected $table = 'tenant-users';
+    protected $table = 'root_users';
 
     /**
      * The attributes that are mass assignable.
