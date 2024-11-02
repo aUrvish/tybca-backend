@@ -1,3 +1,3 @@
 <template>
-    <h1 class="text-red-500">Hello world</h1>
+    <h1>Overviwe section</h1>
 </template>

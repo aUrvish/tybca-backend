@@ -8,7 +8,7 @@ const isShowSidebar = ref(false);
 </script>
 
 <template>
-    <div class="antialiased bg-gray-50 h-full">
+    <div class="antialiased bg-gray-100 h-full">
         <!-- navbar -->
         <AppNav
             class="fixed left-0 right-0 top-0"

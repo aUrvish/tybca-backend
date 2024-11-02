@@ -1,14 +1,25 @@
 <template>
     <aside
         class="fixed top-0 left-0 lg:z-50 z-40 w-64 h-screen lg:pt-0 pt-14 transition-transform bg-[#1a2e44] lg:translate-x-0 dark:bg-gray-800 dark:border-gray-700 -translate-x-full"
+        :class="isMiniSidebar ? 'w-16' : 'w-64'"
     >
         <!-- :class="isShow ? 'translate-x-0' : '-translate-x-full'" -->
-        <div class="space-y-2 px-4 py-2 hidden lg:block">
+        <div
+            class="space-y-2 hidden lg:block"
+            :class="isMiniSidebar ? 'px-3 py-1' : 'px-4 py-2'"
+        >
             <a href="#">
                 <img
                     src="@/assets/svgs/logo-light.svg"
                     class="max-w-[120px] md:max-w-[165px] py-1.5 md:pt-2 md:pb-0"
                     alt="Logo"
+                    v-if="!isMiniSidebar"
+                />
+                <img
+                    src="@/assets/svgs/logo-mini.svg"
+                    class="max-w-[40px] py-1.5 md:pt-2 md:pb-0"
+                    alt="Logo"
+                    v-else
                 />
             </a>
         </div>
@@ -35,6 +46,7 @@
                         </svg>
                         <span
                             class="ml-3.5 group-hover:text-white text-gray-400 font-normal"
+                            v-if="!isMiniSidebar"
                             >Overview</span
                         >
                     </a>
@@ -56,6 +68,7 @@
                         </svg>
                         <span
                             class="ml-3.5 group-hover:text-white text-gray-400 font-normal"
+                            v-if="!isMiniSidebar"
                             >Tenants</span
                         >
                     </a>
@@ -77,6 +90,7 @@
                         </svg>
                         <span
                             class="ml-3.5 group-hover:text-white text-gray-400 font-normal"
+                            v-if="!isMiniSidebar"
                             >Billings</span
                         >
                     </a>
@@ -100,6 +114,7 @@
                         </svg>
                         <span
                             class="ml-3.5 group-hover:text-white text-gray-400 font-normal"
+                            v-if="!isMiniSidebar"
                             >Reports</span
                         >
                     </a>
@@ -121,14 +136,16 @@
                         </svg>
                         <span
                             class="ml-3.5 group-hover:text-white text-gray-400 font-normal"
+                            v-if="!isMiniSidebar"
                             >Settings</span
                         >
                     </a>
                 </li>
             </ul>
         </div>
-        <div
-            class="absolute top-0 z-99 p-4 cursor-pointer text-white left-full"
+        <button
+            @click="isMiniSidebar = !isMiniSidebar"
+            class="absolute top-0 z-99 p-3 cursor-pointer text-white left-full"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -139,9 +156,15 @@
                     d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM64 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L96 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"
                 />
             </svg>
-        </div>
+        </button>
     </aside>
 </template>
+
+<script setup>
+import { ref } from "vue";
+
+const isMiniSidebar = ref(false);
+</script>
 
 <style scoped>
 .router-link-exact-active {
