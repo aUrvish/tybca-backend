@@ -1,6 +1,6 @@
 <template>
     <aside
-        class="fixed top-0 left-0 lg:z-50 z-40 w-64 h-screen lg:pt-0 pt-14 transition-transform bg-[#1a2e44] lg:translate-x-0 dark:bg-gray-800 dark:border-gray-700 -translate-x-full"
+        class="fixed top-0 left-0 lg:z-50 z-40 h-screen lg:pt-0 pt-14 transition-all bg-[#1a2e44] lg:translate-x-0 dark:bg-gray-800 dark:border-gray-700 -translate-x-full"
         :class="isMiniSidebar ? 'w-16' : 'w-64'"
     >
         <!-- :class="isShow ? 'translate-x-0' : '-translate-x-full'" -->
@@ -31,6 +31,7 @@
                     <a
                         href="#"
                         class="flex items-center p-2 text-base font-medium text-white rounded-md hover:bg-[#38445e] group"
+                        :class="isMiniSidebar ? 'justify-center' : ''"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -55,6 +56,7 @@
                     <a
                         href="#"
                         class="flex items-center p-2 text-base font-medium text-white rounded-md hover:bg-[#38445e] group"
+                        :class="isMiniSidebar ? 'justify-center' : ''"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -77,6 +79,7 @@
                     <a
                         href="#"
                         class="flex items-center p-2 text-base font-medium text-white rounded-md hover:bg-[#38445e] group"
+                        :class="isMiniSidebar ? 'justify-center' : ''"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -101,6 +104,7 @@
                     <a
                         href="#"
                         class="flex items-center p-2 text-base font-medium text-white rounded-md hover:bg-[#38445e] group"
+                        :class="isMiniSidebar ? 'justify-center' : ''"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -123,6 +127,7 @@
                     <a
                         href="#"
                         class="flex items-center p-2 text-base font-medium text-white rounded-md hover:bg-[#38445e] group"
+                        :class="isMiniSidebar ? 'justify-center' : ''"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -144,8 +149,11 @@
             </ul>
         </div>
         <button
-            @click="isMiniSidebar = !isMiniSidebar"
-            class="absolute top-0 z-99 p-3 cursor-pointer text-white left-full"
+            @click="
+                (isMiniSidebar = !isMiniSidebar),
+                    $emit('changeSidebarSize', isMiniSidebar)
+            "
+            class="absolute top-0 z-99 p-4 cursor-pointer text-white left-full"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -163,7 +171,16 @@
 <script setup>
 import { ref } from "vue";
 
-const isMiniSidebar = ref(false);
+const props = defineProps({
+    isShow: {
+        default: false,
+    },
+    isMini: {
+        default: false,
+    },
+});
+
+const isMiniSidebar = ref(props.isMini);
 </script>
 
 <style scoped>
