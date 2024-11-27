@@ -3,7 +3,7 @@
         <!-- navbar -->
         <AppNav
             class="fixed left-0 right-0 top-0"
-            @showSidebar="(value) => (isShowSidebar = value)"
+            @showSidebar="(value) => (isShowSidebar = value, isMiniSidebar = false)"
         />
 
         <!-- Sidebar -->
@@ -14,10 +14,12 @@
         />
 
         <main
-            class="p-4 h-auto pt-20"
+            class="p-4 h-full pt-20"
             :class="isMiniSidebar ? 'lg:ml-16' : 'lg:ml-64'"
         >
-            <RouterView />
+            <div class="container border mx-auto px-4" >
+                <RouterView />
+            </div>
         </main>
     </div>
 </template>

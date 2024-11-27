@@ -1,17 +1,19 @@
 <template>
     <nav
-        class="bg-white border-b border-gray-200 sm:px-4 px-2 py-2 lg:z-40 z-50"
+        class="bg-white border-b border-gray-200 sm:px-4 px-2 lg:py-1.5 py-1 lg:z-40 z-50"
     >
         <div class="flex flex-wrap justify-between items-center">
             <div class="flex justify-start items-center">
                 <button
                     class="p-2 mr-2 rounded-full cursor-pointer lg:hidden hover:bg-gray-100"
+                    @click="isShowSidebar =! isShowSidebar, $emit('showSidebar', isShowSidebar)"
                 >
                     <!-- menu icon -->
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        class="w-6 h-6"
+                        class="w-5 h-5"
                         viewBox="0 0 448 512"
+                        v-if="!isShowSidebar"
                     >
                         <path
                             d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"
@@ -22,7 +24,8 @@
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 384 512"
-                        class="w-6 h-6"
+                        class="w-5 h-5"
+                        v-else
                     >
                         <path
                             d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"
@@ -32,7 +35,7 @@
                 <a href="#">
                     <img
                         src="@/assets/svgs/logo.svg"
-                        class="max-w-[120px] md:hidden py-1.5 md:py-0"
+                        class="max-w-[140px] lg:hidden py-0.5"
                         alt="Logo"
                     />
                 </a>
@@ -40,7 +43,20 @@
             <div class="flex items-center lg:order-2">
                 <!-- Notifications -->
                 <button
-                    class="p-2 mx-1 rounded-full border border-gray-300 hover:bg-gray-100 relative"
+                    class="p-2 md:mx-1.5 mx-0.5 rounded-full border text-gray-500 border-gray-300 hover:bg-gray-100 relative"
+                >
+                    <!-- Bell icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] fill-current" viewBox="0 0 512 512">
+                        <path d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480l0-83.6c0-4 1.5-7.8 4.2-10.8L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"/>
+                    </svg>
+                    <div
+                        class="w-2 aspect-square rounded-full bg-red-500 absolute right-0"
+                    ></div>
+                </button>
+
+                <!-- Notifications -->
+                <button
+                    class="p-2 md:mx-1.5 mx-0.5 rounded-full border text-gray-500 border-gray-300 hover:bg-gray-100 relative"
                     @click="isShowNotification = !isShowNotification"
                     v-click-outside="() => (isShowNotification = false)"
                 >
@@ -62,7 +78,7 @@
                 <!-- Dropdown menu -->
                 <transition name="slide-up">
                     <div
-                        class="overflow-hidden absolute top-full sm:right-5 right-1 z-50 my-4 max-w-sm text-base list-none bg-white rounded-md border shadow-md"
+                        class="overflow-hidden absolute top-full sm:right-5 right-3 z-50 md:my-4 my-2 md:max-w-sm max-w-xs text-base list-none bg-white rounded-md border shadow-md"
                         v-show="isShowNotification"
                     >
                         <div
@@ -90,10 +106,10 @@
                                 </div>
                                 <div class="pl-3 w-full">
                                     <div
-                                        class="text-gray-500 font-normal text-sm mb-1.5"
+                                        class="text-gray-500 font-normal line-clamp-1 text-sm mb-1"
                                     >
                                         New message from Jone Deo "Hello, what's
-                                        up?"
+                                        up?" dfsdfsdfsdfsdfsdfsdfsdfsdfsdfsf sdfdfsdfsdfsdf sdfsdfsdfsdfsdfsdf sdfsdfsdfsdf
                                     </div>
                                     <div class="text-xs font-medium">
                                         1 hour ago
@@ -136,7 +152,7 @@
                 >
                     <UserAvatar name="Jone Deo" class="w-9 h-9" />
 
-                    <div>
+                    <div class="md:block hidden">
                         <p
                             class="text-base font-medium mb-0.5 leading-none text-left"
                         >
@@ -153,7 +169,7 @@
                 <!-- Dropdown menu -->
                 <transition name="slide-up">
                     <div
-                        class="absolute top-full right-5 z-50 my-4 w-60 text-base list-none bg-white divide-y border shadow-md rounded-md"
+                        class="absolute top-full right-3 z-50 md:my-4 my-2 w-60 text-base list-none bg-white divide-y border shadow-md rounded-md"
                         v-show="isShowUserMenu"
                     >
                         <div class="flex gap-3 items-center flex-col py-4 px-4">
@@ -209,4 +225,5 @@ import UserAvatar from "./UserAvatar.vue";
 
 const isShowNotification = ref(false);
 const isShowUserMenu = ref(false);
+const isShowSidebar = ref(false);
 </script>

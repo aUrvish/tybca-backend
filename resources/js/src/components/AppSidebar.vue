@@ -1,7 +1,7 @@
 <template>
     <aside
-        class="fixed top-0 left-0 lg:z-50 z-40 h-screen lg:pt-0 pt-14 transition-all bg-[#1a2e44] lg:translate-x-0 dark:bg-gray-800 dark:border-gray-700 -translate-x-full"
-        :class="isMiniSidebar ? 'w-16' : 'w-64'"
+        class="fixed top-0 left-0 lg:z-50 z-40 h-screen lg:pt-0 pt-14 transition-all bg-[#1a2e44] lg:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+        :class="[isMiniSidebar ? 'w-16' : 'w-64', isShow ? '' : '-translate-x-full']"
     >
         <!-- :class="isShow ? 'translate-x-0' : '-translate-x-full'" -->
         <div
@@ -24,10 +24,10 @@
             </a>
         </div>
         <div
-            class="overflow-y-auto py-5 px-3 h-full bg-transparent dark:bg-gray-800"
+            class="overflow-y-auto py-5 h-full bg-transparent dark:bg-gray-800 [&>*>li]:px-3"
         >
             <ul class="space-y-2">
-                <li>
+                <li v-tooltip.right="isMiniSidebar ? 'Overview' : null" >
                     <a
                         href="#"
                         class="flex items-center p-2 text-base font-medium text-white rounded-md hover:bg-[#38445e] group"
@@ -52,7 +52,7 @@
                         >
                     </a>
                 </li>
-                <li>
+                <li v-tooltip.right="isMiniSidebar ? 'Tenants' : null" >
                     <a
                         href="#"
                         class="flex items-center p-2 text-base font-medium text-white rounded-md hover:bg-[#38445e] group"
@@ -75,7 +75,7 @@
                         >
                     </a>
                 </li>
-                <li>
+                <li v-tooltip.right="isMiniSidebar ? 'Billings' : null" >
                     <a
                         href="#"
                         class="flex items-center p-2 text-base font-medium text-white rounded-md hover:bg-[#38445e] group"
@@ -100,7 +100,7 @@
                 </li>
             </ul>
             <ul class="space-y-2 mt-2 border-t border-[#38445e] pt-2">
-                <li>
+                <li v-tooltip.right="isMiniSidebar ? 'Reports' : null" >
                     <a
                         href="#"
                         class="flex items-center p-2 text-base font-medium text-white rounded-md hover:bg-[#38445e] group"
@@ -123,7 +123,7 @@
                         >
                     </a>
                 </li>
-                <li>
+                <li v-tooltip.right="isMiniSidebar ? 'Settings' : null">
                     <a
                         href="#"
                         class="flex items-center p-2 text-base font-medium text-white rounded-md hover:bg-[#38445e] group"
