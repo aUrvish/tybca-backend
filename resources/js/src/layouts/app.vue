@@ -17,7 +17,7 @@
             class="p-4 h-full pt-20"
             :class="isMiniSidebar ? 'lg:ml-16' : 'lg:ml-64'"
         >
-            <div class="container border mx-auto px-4" >
+            <div class="container mx-auto" >
                 <RouterView />
             </div>
         </main>
