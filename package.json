@@ -18,6 +18,7 @@
         "click-outside-vue3": "^4.0.1",
         "floating-vue": "^5.2.2",
         "vue": "^3.5.12",
+        "vue-awesome-paginate": "^1.2.0",
         "vue-loader": "^17.3.1",
         "vue-router": "^4.4.5"
     }

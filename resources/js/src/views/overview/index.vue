@@ -1,5 +1,4 @@
 <template>
-    <h1>Overviwe section</h1>
     <Table />
 </template>
 

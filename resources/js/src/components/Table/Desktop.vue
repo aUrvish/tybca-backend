@@ -22,12 +22,41 @@
                             </div>
                         </form>
                     </div>
+
+                    <div class="relative">
+                        <button
+                            class="w-full md:w-auto flex items-center justify-center py-2 px-4 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-md border border-gray-200 hover:bg-gray-100 hover:text-primary-700"
+                            type="button">
+                            Bulk Actions
+                        </button>
+                        <div
+                            class="hidden absolute right-0 top-[110%] z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow-md border">
+                            <ul class="py-1 text-sm">
+                                <li>
+                                    <a href="#"
+                                        class="block py-2 px-4 hover:bg-gray-100">Mass
+                                        Edit</a>
+                                </li>
+                            </ul>
+                            <div class="py-1">
+                                <a href="#"
+                                    class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">Delete
+                                    all</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left">
                         <thead class="text-xs border-b uppercase">
                             <tr class="[&>*]:whitespace-nowrap">
-                                <th scope="col" class="px-4 py-3 sr-only">Rank</th>
+                                <!-- <th scope="col" class="px-4 py-3 sr-only">Rank</th> -->
+                                <th scope="col" class="p-4">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" class="w-4 h-4 bg-gray-100 border-gray-300 rounded">
+                                        <label class="sr-only">checkbox</label>
+                                    </div>
+                                </th>
                                 <th scope="col" class="pr-4 pl-1 py-3">
                                     <div class="cursor-pointer flex gap-1 items-center">
                                         <p>User ID</p>
@@ -69,10 +98,16 @@
                         </thead>
                         <tbody>
                             <tr class="[&>*]:whitespace-nowrap border-b" v-for="i in max" :key="i">
-                                <td class="pl-4 py-0">
-                                    <!-- <img src="@/assets/svgs/rank1.svg" v-if="i == 1" class="w-6" alt="rank">
+                                <!-- <td class="pl-4 py-0"> -->
+                                <!-- <img src="@/assets/svgs/rank1.svg" v-if="i == 1" class="w-6" alt="rank">
                                     <img src="@/assets/svgs/rank2.svg" v-if="i == 2" class="w-6" alt="rank">
                                     <img src="@/assets/svgs/rank3.svg" v-if="i == 3" class="w-6" alt="rank"> -->
+                                <!-- </td> -->
+                                <td class="w-4 px-4 py-3">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" class="w-4 h-4 bg-gray-100 border-gray-300 rounded">
+                                        <label class="sr-only">checkbox</label>
+                                    </div>
                                 </td>
                                 <td scope="row" class="pr-4 py-3">
                                     <div class="flex items-center gap-4">
@@ -119,7 +154,7 @@
                                         </label>
                                         <button
                                             class="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-gray-800 rounded-lg"
-                                            @click="showActionMenu($event,i)" v-click-outside="() => hideActionMenu(i)"
+                                            @click="showActionMenu($event, i)" v-click-outside="() => hideActionMenu(i)"
                                             type="button">
                                             <svg class="w-5 h-5 rotate-90" aria-hidden="true" fill="currentColor"
                                                 viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -127,8 +162,9 @@
                                                     d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
                                             </svg>
                                         </button>
-                                        <div class="absolute z-10 w-44 bg-white border right-10 rounded-md divide-y divide-gray-100 shadow" ref="menu"
-                                            v-show="isShowActionMenu == i" :style="max - 3 < i ? {top : `${menuTop - 208}px`} : {top : `${menuTop - 108}px`}">
+                                        <div class="absolute z-10 w-44 bg-white border right-10 rounded-md divide-y divide-gray-100 shadow"
+                                            ref="menu" v-show="isShowActionMenu == i"
+                                            :style="max - 3 < i ? { top: `${menuTop - 208}px` } : { top: `${menuTop - 108}px` }">
                                             <!-- :class="max - 3 < i ? 'bottom-full' : 'top-full'" -->
                                             <ul class="py-1 text-sm text-gray-700">
                                                 <li>
@@ -151,38 +187,34 @@
                     </table>
                 </div>
                 <nav class="flex justify-between items-center space-y-0 p-4" aria-label="Table navigation">
-                    <span class="text-sm font-normal text-gray-500">
-                        Showing
-                        <span class="font-semibold text-gray-900">1-10</span>
-                        of
-                        <span class="font-semibold text-gray-900">1000</span>
-                    </span>
-                    <ul class="inline-flex items-stretch -space-x-px">
-                        <li>
-                            <a href="#"
-                                class="flex items-center justify-center gap-1 h-full py-1.5 px-3 ml-0 text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700">
-                                <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd"
-                                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
+                    <div class="flex gap-2 items-center">
+                        <div class="flex gap-2 items-center">
+                            <p class="text-sm font-normal text-gray-500">Rows Per Page:</p>
+                            <div class="relative">
+                                <select
+                                    class="bg-gray-50 border border-gray-300 w-14 text-gray-900 text-sm rounded-md block py-1.5 px-2 outline-none">
+                                    <option selected>10</option>
+                                    <option value="15">15</option>
+                                    <option value="20">20</option>
+                                    <option value="25">25</option>
+                                </select>
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="w-2.5 absolute top-1/2 -translate-y-1/2 right-2 fill-gray-500 pointer-events-none"
+                                    viewBox="0 0 512 512">
+                                    <path
+                                        d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
                                 </svg>
-                                <span>Prev</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#"
-                                class="flex items-center justify-center gap-1 h-full py-1.5 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700">
-                                <span>Next</span>
-                                <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd"
-                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </a>
-                        </li>
-                    </ul>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-sm font-normal text-gray-500">
+                                <span class="font-semibold text-gray-900">1-10</span>
+                                of
+                                <span class="font-semibold text-gray-900">1000</span>
+                            </span>
+                        </div>
+                    </div>
+                    <Pagination />
                 </nav>
             </div>
         </div>
@@ -191,6 +223,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import Pagination from '../Pagination.vue';
 const props = defineProps({
     max: {
         default: 10,
@@ -201,9 +234,9 @@ const menuTop = ref(0);
 const menu = ref(0);
 
 const showActionMenu = (e, index) => {
-    const {top} = e.currentTarget.getBoundingClientRect()    
-    
-    menuTop.value =top
+    const { top } = e.currentTarget.getBoundingClientRect()
+
+    menuTop.value = top
 
     if (isShowActionMenu.value == index) {
         isShowActionMenu.value = null
@@ -218,3 +251,11 @@ const hideActionMenu = (index) => {
     }
 }
 </script>
+
+<style>
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+</style>
