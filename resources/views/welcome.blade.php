@@ -9,7 +9,7 @@
     <link rel="shortcut icon" href="path-to-your-icon/favicon.ico" type="image/x-icon">
     @vite('resources/css/app.css')
 </head>
-<body>
+<body class="bg-gray-100">
     <div id="app"></div>
     @vite('resources/js/app.js')
 </body>

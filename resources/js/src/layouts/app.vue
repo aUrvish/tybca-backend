@@ -1,5 +1,5 @@
 <template>
-    <div class="antialiased bg-gray-100 h-full">
+    <div class="antialiased h-full">
         <!-- navbar -->
         <AppNav
             class="fixed left-0 right-0 top-0"
@@ -14,7 +14,7 @@
         />
 
         <main
-            class="p-4 h-full pt-20"
+            class="md:p-4 p-3 h-full md:pt-20 pt-16"
             :class="isMiniSidebar ? 'lg:ml-16' : 'lg:ml-64'"
         >
             <div class="container mx-auto" >

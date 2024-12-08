@@ -7,6 +7,9 @@ const currentPage = ref(1)
 const props = defineProps({
   total : {
     default : 10
+  },
+  maxPage : {
+    default : 3
   }
 })
 
@@ -24,7 +27,7 @@ watch(
       :total-items="total"
       v-model="currentPage"
       :items-per-page="1"
-      :max-pages-shown="3"
+      :max-pages-shown="maxPage"
     >
       <template #prev-button>
           <p class="font-normal text-gray-500">Prev</p>
@@ -42,12 +45,12 @@ watch(
   @apply items-center
 }
 .pagination .paginate-buttons {
-  @apply h-[38px] w-[38px] cursor-pointer border-l border-y border-solid bg-transparent sm:text-sm text-[14px] border-[#ccc] text-gray-500
+  @apply h-[38px] w-[38px] cursor-pointer border-l border-y border-solid bg-transparent sm:text-sm text-[14px] border-[#ccc] text-gray-500 md:block hidden
 }
 
 .pagination .back-button,
 .pagination .next-button {
-    @apply h-[38px] w-[64px]
+    @apply h-[38px] w-[64px] block
 }
 
 .pagination .next-button {

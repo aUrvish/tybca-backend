@@ -2,7 +2,7 @@
     <section>
         <div>
             <!-- Start coding here -->
-            <div class="bg-white relative border sm:rounded-lg overflow-hidden">
+            <div class="bg-white relative border sm:rounded-lg overflow-hidden" ref="tableDiv">
                 <div class="flex items-center justify-between p-4">
                     <div class="w-full sm:max-w-[280px] max-w-[150px]">
                         <form class="flex items-center">
@@ -270,7 +270,7 @@
                                         </button>
                                         <div class="absolute z-10 w-44 bg-white border right-10 rounded-md divide-y divide-gray-100 shadow"
                                             ref="menu" v-show="isShowActionMenu == i"
-                                            :style="max - 3 < i ? { top: `${menuTop - 208}px` } : { top: `${menuTop - 108}px` }">
+                                            :style="max - 3 < i ? { top: `${menuBottom}px` } : { top: `${menuTop}px` }">
                                             <!-- :class="max - 3 < i ? 'bottom-full' : 'top-full'" -->
                                             <ul class="py-1 text-sm text-gray-700">
                                                 <li>
@@ -328,7 +328,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import Pagination from '../Pagination.vue';
 const props = defineProps({
     max: {
@@ -337,12 +337,17 @@ const props = defineProps({
 })
 const isShowActionMenu = ref(null)
 const menuTop = ref(0);
+const menuBottom = ref(0);
 const menu = ref(0);
+const tableDiv = ref(null)
 
 const showActionMenu = (e, index) => {
-    const { top } = e.currentTarget.getBoundingClientRect()
 
-    menuTop.value = top
+    const { top, height } = e.currentTarget.getBoundingClientRect()
+    const {top : perentTop} = tableDiv.value.getBoundingClientRect()
+    
+    menuTop.value = top - perentTop
+    menuBottom.value = top - perentTop - 100
 
     if (isShowActionMenu.value == index) {
         isShowActionMenu.value = null
