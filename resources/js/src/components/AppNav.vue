@@ -146,7 +146,7 @@
 
                 <!-- user menu -->
                 <button
-                    class="flex mx-2 text-sm md:mr-0 justify-center items-center gap-2"
+                    class="flex ml-2 mr-1 text-sm md:mr-0 justify-center items-center gap-2"
                     @click="isShowUserMenu = !isShowUserMenu"
                     v-click-outside="() => (isShowUserMenu = false)"
                 >

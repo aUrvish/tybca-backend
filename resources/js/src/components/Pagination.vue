@@ -50,7 +50,7 @@ watch(
 
 .pagination .back-button,
 .pagination .next-button {
-    @apply h-[38px] w-[64px] block
+    @apply md:h-[38px] h-8 w-[64px] block bg-white
 }
 
 .pagination .next-button {

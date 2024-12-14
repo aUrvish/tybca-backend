@@ -2,8 +2,8 @@
     <section>
         <div>
             <!-- Start coding here -->
-            <div class="bg-white relative border sm:rounded-lg rounded-md overflow-hidden">
-                <div class="flex flex-col px-2 py-3 gap-2">
+            <div class="relative sm:rounded-lg rounded-md overflow-hidden">
+                <div class="flex flex-col py-3 gap-2">
                     <div class="w-full flex gap-2 items-center">
                         <form class="flex items-center w-full">
                             <label for="simple-search" class="sr-only">Search</label>
@@ -17,45 +17,10 @@
                                     </svg>
                                 </div>
                                 <input type="text" id="simple-search"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full pl-10 p-2"
+                                    class="bg-white border text-gray-900 text-sm rounded-md block w-full pl-10 p-2"
                                     placeholder="Search">
                             </div>
                         </form>
-                        <div class="relative">
-                            <button
-                                class="w-full md:w-auto flex items-center justify-center py-2 px-2.5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-md border border-gray-200 hover:bg-gray-100 hover:text-primary-700 whitespace-nowrap"
-                                type="button">
-                                Sort By
-                                <svg class="-mr-1 ml-1.5 w-5 h-5 text-gray-400" fill="currentColor" viewbox="0 0 20 20"
-                                    xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path clip-rule="evenodd" fill-rule="evenodd"
-                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                                </svg>
-                            </button>
-                            <div
-                                class="hidden absolute right-0 top-[110%] z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow-md border p-4">
-                                <div>
-                                    <ul class="space-y-2 text-sm">
-                                        <li class="flex items-center">
-                                            <input id="apple" type="checkbox" value=""
-                                                class="w-3.5 h-3.5 bg-gray-100 border-gray-300 rounded text-primary-600">
-                                            <label for="apple" class="ml-2 text-sm font-medium text-gray-900">Newest
-                                                Records</label>
-                                        </li>
-                                        <li class="flex items-center">
-                                            <input id="fitbit" type="checkbox" value=""
-                                                class="w-3.5 h-3.5 bg-gray-100 border-gray-300 rounded text-primary-600">
-                                            <label for="fitbit" class="ml-2 text-sm font-medium text-gray-900">Oldest
-                                                Records</label>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-2 items-center justify-start">
-
                         <div class="relative">
                             <button
                                 class="w-full md:w-auto flex items-center justify-center py-2 px-2.5 text-sm font-medium text-gray-700 focus:outline-none bg-white rounded-md border border-gray-200 hover:bg-gray-100 hover:text-primary-700"
@@ -158,24 +123,39 @@
                     </div>
 
                 </div>
-                <div class="border-y px-4 py-2">
-                    <div class="flex gap-4 items-center">
-                        <p class="text-sm font-medium text-gray-900">Show only:</p>
-                        <div class="flex items-center">
-                            <input id="inline-radio" type="radio" value="" name="inline-radio-group"
-                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
-                            <label for="inline-radio" class="ms-1.5 text-sm font-medium text-gray-600">Active</label>
+                <div class="flex flex-col gap-2 pb-4">
+                    <!-- <div class="relative flex justify-end">
+                        <button
+                            class="md:w-auto flex items-center justify-center py-1.5 px-2.5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-md border border-gray-200 hover:bg-gray-100 hover:text-primary-700 whitespace-nowrap"
+                            type="button">
+                            Sort By
+                            <svg class="-mr-1 ml-1.5 w-5 h-5 text-gray-400" fill="currentColor" viewbox="0 0 20 20"
+                                xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path clip-rule="evenodd" fill-rule="evenodd"
+                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                            </svg>
+                        </button>
+                        <div
+                            class="hidden absolute right-0 top-[110%] z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow-md border p-4">
+                            <div>
+                                <ul class="space-y-2 text-sm">
+                                    <li class="flex items-center">
+                                        <input id="apple" type="checkbox" value=""
+                                            class="w-3.5 h-3.5 bg-gray-100 border-gray-300 rounded text-primary-600">
+                                        <label for="apple" class="ml-2 text-sm font-medium text-gray-900">Newest
+                                            Records</label>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <input id="fitbit" type="checkbox" value=""
+                                            class="w-3.5 h-3.5 bg-gray-100 border-gray-300 rounded text-primary-600">
+                                        <label for="fitbit" class="ml-2 text-sm font-medium text-gray-900">Oldest
+                                            Records</label>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
-                        <div class="flex items-center">
-                            <input id="inline-2-radio" type="radio" value="" name="inline-radio-group"
-                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
-                            <label for="inline-2-radio"
-                                class="ms-1.5 text-sm font-medium text-gray-600">Inactive</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex flex-col gap-2 px-2 py-4">
-                    <div class="px-2 border rounded-md" v-for="i in 5">
+                    </div> -->
+                    <div class="border rounded-md bg-white px-3" v-for="i in max">
                         <div class="flex justify-between items-center gap-2 py-2 border-b">
                             <div>
                                 <p class="text-[12px] text-gray-600 mb-1 uppercase">User Id</p>
@@ -215,7 +195,8 @@
                                                 d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
                                         </svg>
                                     </button>
-                                    <div class="hidden absolute z-10 w-44 bg-white border top-0 right-6 rounded-md divide-y divide-gray-100 shadow">
+                                    <div
+                                        class="hidden absolute z-10 w-44 bg-white border top-0 right-6 rounded-md divide-y divide-gray-100 shadow">
                                         <ul class="py-1 text-sm text-gray-700">
                                             <li>
                                                 <a href="#" class="block py-2 px-4 hover:bg-gray-100">Show</a>
@@ -267,18 +248,19 @@
                             </div>
                             <div>
                                 <p class="text-[12px] text-gray-600 text-right mb-1 uppercase">Join Date</p>
-                                <div class="flex justify-end" >    
-                                    <span class="text-[12px] border text-green-600 rounded-md border-green-600 py-0.5 px-2">Active</span>
+                                <div class="flex justify-end">
+                                    <span
+                                        class="text-[12px] border text-green-600 rounded-md border-green-600 py-0.5 px-2">Active</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <nav class="flex justify-between items-center space-y-0 p-4" aria-label="Table navigation">
-                    <div class="flex gap-2 items-center">
+                <nav class="flex justify-between items-center space-y-0" aria-label="Table navigation">
+                    <div class="flex gap-2 items-center text-sm">
                         <div>
                             Showing
-                            <span class="text-sm font-normal text-gray-500">
+                            <span class="font-normal text-gray-500">
                                 <span class="font-semibold text-gray-900">1-10</span>
                                 of
                                 <span class="font-semibold text-gray-900">1000</span>
