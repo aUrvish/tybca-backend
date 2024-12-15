@@ -1,11 +1,17 @@
 <template>
     <div>
-        <Desktop class="md:block hidden" />
-        <Mobile class="md:hidden block" />
+        <Universal />
     </div>
 </template>
 
 <script setup>
-import Desktop from './Desktop.vue';
-import Mobile from './Mobile.vue';
+import Universal from './Universal.vue';
+
+const props = defineProps({
+    config : {
+        require : true
+    }
+});
+
+console.log(props.config);
 </script>
